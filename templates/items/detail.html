@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ item.title }}{% endblock %}
+
+{% block content %}
+<div class="item-detail-container" style="max-width: 1000px; margin: 0 auto;">
+    <div style="margin-bottom: 2rem;">
+        <a href="{{ url_for('items.browse') }}" style="color: var(--text-muted);"><i class="fa-solid fa-arrow-left"></i> Back to Browse</a>
+    </div>
+
+    <div class="card">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0;">
+            <!-- Image Side -->
+            <div style="border-right: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; background-color: #f1f3f5; min-height: 400px;">
+                <img src="{{ url_for('static', filename='images/uploads/' + (item.image_url if item.image_url else 'placeholder.jpg')) }}" alt="{{ item.title }}" style="max-width: 100%; max-height: 500px; object-fit: contain;" onerror="this.src='https://placehold.co/600x400/eeeeee/2ecc71?text=No+Image'">
+            </div>
+            
+            <!-- Details Side -->
+            <div class="card-body" style="padding: 3rem; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 1.5rem;">
+                    <span class="badge badge-secondary" style="margin-bottom: 1rem; display: inline-block;">{{ item.category }}</span>
+                    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ item.title }}</h1>
+                    <div style="display: flex; align-items: center; gap: 1rem; color: var(--text-muted);">
+                        <span><i class="fa-solid fa-clock"></i> Listed {{ item.created_at.strftime('%b %d, %Y') }}</span>
+                        <span>&bull;</span>
+                        <span><i class="fa-solid fa-star-half-stroke"></i> {{ item.condition }} Condition</span>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3>Description</h3>
+                    <p style="color: var(--text-color); line-height: 1.7;">{{ item.description }}</p>
+                </div>
+
+                <div style="margin-bottom: 2rem; padding: 1rem; background-color: var(--bg-color); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-location-dot" style="color: var(--primary-color);"></i> Pickup Location</h4>
+                    <p style="color: var(--text-muted);">{{ item.pickup_location }}</p>
+                </div>
+
+                <div style="margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold;">
+                        {{ item.donor.username[0] | upper }}
+                    </div>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 0;">Donated by {{ item.donor.username }}</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;"><i class="fa-solid fa-star"></i> {{ item.donor.reputation_score }} Reputation</p>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto;">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.id == item.donor_id %}
+                            <p style="color: var(--text-muted); text-align: center; margin-bottom: 1rem;">This is your item.</p>
+                            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary btn-full">View Dashboard to Manage Requests</a>
+                        {% elif has_requested %}
+                            <div class="alert alert-info" style="margin-bottom: 0;">
+                                <i class="fa-solid fa-circle-info"></i> You have requested this item. Status: <strong>{{ request.status | title }}</strong>
+                                {% if request.status == 'accepted' %}
+                                    <br><a href="{{ url_for('chat.room', request_id=request.id) }}" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Go to Chat & Arrange Pickup</a>
+                                {% endif %}
+                            </div>
+                        {% elif item.status != 'available' %}
+                            <button class="btn btn-secondary btn-full" disabled>Item no longer available</button>
+                        {% else %}
+                            <form method="POST" action="{{ url_for('requests.create_request', item_id=item.id) }}">
+                                <button type="submit" class="btn btn-primary btn-full" style="font-size: 1.1rem; padding: 1rem;">Request This Item</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <div style="text-align: center;">
+                            <p style="margin-bottom: 1rem;">You must be logged in to request this item.</p>
+                            <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary btn-full">Log In to Request</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

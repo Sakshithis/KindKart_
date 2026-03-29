@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 2rem;">
+    <h1>My Dashboard</h1>
+    <p>Manage your donations, requests, and impact.</p>
+</div>
+
+<div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
+    <div class="card" style="text-align: center;">
+        <div class="card-body">
+            <h3 style="font-size: 2rem; color: var(--primary-color);">{{ donations|length }}</h3>
+            <p style="color: var(--text-muted); font-weight: 500;">Items Donated</p>
+        </div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div class="card-body">
+            <h3 style="font-size: 2rem; color: var(--secondary-color);">{{ requests_sent|length }}</h3>
+            <p style="color: var(--text-muted); font-weight: 500;">Requests Made</p>
+        </div>
+    </div>
+    <div class="card" style="text-align: center;">
+        <div class="card-body">
+            <h3 style="font-size: 2rem; color: var(--warning-color);">{{ requests_received|length }}</h3>
+            <p style="color: var(--text-muted); font-weight: 500;">Requests Received</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+    <h2>My Donations</h2>
+    {% if donations %}
+        <div style="overflow-x: auto; margin-top: 1rem;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem;">Item</th>
+                        <th style="padding: 1rem;">Category</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Date</th>
+                        <th style="padding: 1rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in donations %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem; font-weight: 500;">{{ item.title }}</td>
+                        <td style="padding: 1rem;"><span class="badge badge-secondary">{{ item.category }}</span></td>
+                        <td style="padding: 1rem;">
+                            <span class="badge {% if item.status == 'available' %}badge-primary{% elif item.status == 'completed' %}badge-secondary{% else %}badge-warning{% endif %}">
+                                {{ item.status | title }}
+                            </span>
+                        </td>
+                        <td style="padding: 1rem;">{{ item.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td style="padding: 1rem;">
+                            <a href="{{ url_for('items.detail', item_id=item.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--text-muted); margin-top: 1rem;">You haven't donated any items yet.</p>
+        <a href="{{ url_for('items.donate') }}" class="btn btn-primary" style="margin-top: 1rem;">Donate Your First Item</a>
+    {% endif %}
+</div>
+
+<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-top: 2rem;">
+    <h2>Requests Received</h2>
+    {% if requests_received %}
+        <div style="overflow-x: auto; margin-top: 1rem;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem;">Item</th>
+                        <th style="padding: 1rem;">Requester</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests_received %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><a href="{{ url_for('items.detail', item_id=req.item.id) }}">{{ req.item.title }}</a></td>
+                        <td style="padding: 1rem;">{{ req.requester.username }} ({{ req.requester.reputation_score }} Rep)</td>
+                        <td style="padding: 1rem;">
+                            <span class="badge {% if req.status == 'accepted' %}badge-primary{% elif req.status == 'rejected' %}badge-secondary{% else %}badge-warning{% endif %}">
+                                {{ req.status | title }}
+                            </span>
+                        </td>
+                        <td style="padding: 1rem; display: flex; gap: 0.5rem;">
+                            {% if req.status == 'pending' and req.item.status == 'available' %}
+                                <form method="POST" action="{{ url_for('requests.update_request', request_id=req.id) }}" style="display:inline;">
+                                    <input type="hidden" name="action" value="accept">
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Accept</button>
+                                </form>
+                                <form method="POST" action="{{ url_for('requests.update_request', request_id=req.id) }}" style="display:inline;">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Reject</button>
+                                </form>
+                            {% elif req.status == 'accepted' %}
+                                <a href="{{ url_for('chat.room', request_id=req.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> Chat</a>
+                                {% if req.item.status != 'completed' %}
+                                <form method="POST" action="{{ url_for('requests.complete_request', request_id=req.id) }}" style="display:inline;" onsubmit="return confirm('Mark this donation as successfully completed?');">
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fa-solid fa-check"></i> Complete</button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--text-muted); margin-top: 1rem;">No one has requested your items yet.</p>
+    {% endif %}
+</div>
+
+<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-top: 2rem;">
+    <h2>My Requests (Sent)</h2>
+    {% if requests_sent %}
+        <div style="overflow-x: auto; margin-top: 1rem;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem;">Item</th>
+                        <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests_sent %}
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><a href="{{ url_for('items.detail', item_id=req.item.id) }}">{{ req.item.title }}</a></td>
+                        <td style="padding: 1rem;">
+                            <span class="badge {% if req.status == 'accepted' %}badge-primary{% elif req.status == 'rejected' %}badge-secondary{% else %}badge-warning{% endif %}">
+                                {{ req.status | title }}
+                            </span>
+                        </td>
+                        <td style="padding: 1rem;">
+                            {% if req.status == 'accepted' %}
+                                <a href="{{ url_for('chat.room', request_id=req.id) }}" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Chat with Donor</a>
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.9rem;">Waiting...</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p style="color: var(--text-muted); margin-top: 1rem;">You haven't requested any items.</p>
+    {% endif %}
+</div>
+{% endblock %}

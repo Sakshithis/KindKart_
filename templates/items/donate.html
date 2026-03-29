@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Donate Item{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>Donate an Item</h1>
+        <p style="color: var(--text-muted);">Fill out the details below so someone in need can request it.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 2.5rem;">
+            <form method="POST" action="{{ url_for('items.donate') }}" enctype="multipart/form-data">
+                
+                <div class="form-group">
+                    <label for="title">Item Title <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" id="title" name="title" required placeholder="e.g. Winter Coat, Calculus Textbook">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="form-group">
+                        <label for="category">Category <span style="color: var(--danger-color);">*</span></label>
+                        <select id="category" name="category" required>
+                            <option value="" disabled selected>Select category</option>
+                            <option value="Clothes">Clothes</option>
+                            <option value="Books">Books</option>
+                            <option value="Electronics">Electronics</option>
+                            <option value="Furniture">Furniture</option>
+                            <option value="Others">Others</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="condition">Condition <span style="color: var(--danger-color);">*</span></label>
+                        <select id="condition" name="condition" required>
+                            <option value="" disabled selected>Select condition</option>
+                            <option value="New">New (Never used)</option>
+                            <option value="Like New">Like New (Barely used)</option>
+                            <option value="Good">Good (Used but in good condition)</option>
+                            <option value="Fair">Fair (Noticeable wear)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description <span style="color: var(--danger-color);">*</span></label>
+                    <textarea id="description" name="description" rows="4" required placeholder="Provide details about the item's size, age, history, etc..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="pickup_location">Pickup Location <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" id="pickup_location" name="pickup_location" value="{{ current_user.location }}" required>
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px;">A safe public place is recommended.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="image">Upload Image</label>
+                    <div style="border: 2px dashed var(--border-color); padding: 2rem; border-radius: var(--radius-md); text-align: center; background-color: var(--bg-color);">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+                        <br>
+                        <input type="file" id="image" name="image" accept="image/*" style="display: none;" onchange="document.getElementById('file-name').textContent = this.files[0].name;">
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('image').click();" style="margin-bottom: 0.5rem;">Select Photo</button>
+                        <br>
+                        <span id="file-name" style="color: var(--text-muted); font-size: 0.9rem;">No file chosen</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <button type="submit" class="btn btn-primary btn-full" style="font-size: 1.1rem; padding: 1rem;">List Item for Donation</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

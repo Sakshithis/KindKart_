@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>Share Kindness, <span>Reduce Waste</span></h1>
+    <p>Join our peer-to-peer donation platform to give items a second life. Donate what you don't need, request what you do, and build a stronger community together.</p>
+    <div class="hero-buttons">
+        <a href="{{ url_for('items.browse') }}" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Browse Items</a>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('items.donate') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem; background: white;">Donate Now</a>
+        {% else %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem; background: white;">Join the Community</a>
+        {% endif %}
+    </div>
+    <div style="margin-top: 2rem;">
+        <span class="badge badge-primary"><i class="fa-solid fa-box-open"></i> {{ items_donated }} Items Donated</span>
+    </div>
+</section>
+
+<section class="features" style="padding: 4rem 0; margin-bottom: 4rem;">
+    <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; letter-spacing: -0.025em;">How It Works</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--primary-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+                <i class="fa-solid fa-camera" style="font-size: 2.5rem;"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; text-transform: uppercase;">1. Snap & List</h3>
+            <p style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Take a photo of the item you want to donate and list it on KindKart.</p>
+        </div>
+        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--secondary-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem;"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; text-transform: uppercase;">2. Request</h3>
+            <p style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Browse available items in your area and request what you need.</p>
+        </div>
+        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--accent-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+                <i class="fa-solid fa-handshake" style="font-size: 2.5rem;"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; text-transform: uppercase;">3. Connect & Exchange</h3>
+            <p style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Chat with the donor, arrange a pickup, and complete the exchange.</p>
+        </div>
+    </div>
+</section>
+
+<section class="recent-items" style="margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>Recently Added Items</h2>
+        <a href="{{ url_for('items.browse') }}">View All <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+    
+    {% if recent_items %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+        {% for item in recent_items %}
+        <div class="card">
+            <img src="{{ url_for('static', filename='images/uploads/' + (item.image_url if item.image_url else 'placeholder.jpg')) }}" class="card-img-top" alt="{{ item.title }}" onerror="this.src='https://placehold.co/600x400/eeeeee/2ecc71?text=No+Image'">
+            <div class="card-body">
+                <span class="badge badge-secondary" style="margin-bottom: 0.5rem; display: inline-block;">{{ item.category }}</span>
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p class="card-text" style="color: var(--text-color);">
+                    <i class="fa-solid fa-location-dot"></i> {{ item.pickup_location }}
+                </p>
+                <p class="card-text">
+                    {{ item.description[:80] }}{% if item.description|length > 80 %}...{% endif %}
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">
+                        By {{ item.donor.username }}
+                    </span>
+                    <a href="{{ url_for('items.detail', item_id=item.id) }}" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem;">
+        <i class="fa-solid fa-box-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <h3>No items available yet</h3>
+        <p>Be the first to donate an item to the community!</p>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('items.donate') }}" class="btn btn-primary" style="margin-top: 1rem;">Donate Now</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

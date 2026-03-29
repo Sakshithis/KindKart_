@@ -1,0 +1,237 @@
+:root {
+    /* Unique, Lively, Neo-Brutalist Palette */
+    --primary-color: #FF69B4; /* Hot Pink */
+    --primary-hover: #FF1493;
+    --secondary-color: #00E5FF; /* Cyan */
+    --secondary-hover: #00B8D4;
+    --accent-color: #FFE600; /* Bright Yellow */
+    --accent-hover: #FFD600;
+    --success-color: #00E676; /* Bright Green */
+    
+    --bg-color: #FFF9E6; /* Warm Cream */
+    --surface-color: #FFFFFF;
+    
+    --text-color: #111111; /* Almost pitch black for contrast */
+    --text-muted: #444444; 
+    
+    --danger-color: #FF3D00; 
+    --warning-color: #FFC400; 
+    
+    /* Neo-brutalist hard shadows & borders */
+    --border-dark: 4px solid #111111;
+    --border-light: 2px solid #111111;
+    --shadow-hard-sm: 4px 4px 0px #111111;
+    --shadow-hard-md: 6px 6px 0px #111111;
+    --shadow-hard-lg: 10px 10px 0px #111111;
+    --shadow-hard-hover: 2px 2px 0px #111111;
+    
+    /* Friendly rounded corners in brutalism */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-xl: 2rem;
+    --radius-full: 9999px;
+    
+    /* Snappy transitions */
+    --transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Fun dotted background pattern */
+    background-image: radial-gradient(#111111 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-position: 0 0, 15px 15px;
+    background-attachment: fixed;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* Layout */
+.main-content {
+    flex: 1;
+    padding: 3rem 2rem;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--accent-color);
+    border: var(--border-dark);
+    box-shadow: var(--shadow-hard-md);
+    padding: 1rem 2rem;
+    z-index: 1000;
+    transition: var(--transition);
+    margin: 1.5rem;
+    border-radius: var(--radius-md);
+}
+
+.navbar.sticky {
+    position: sticky;
+    top: 1.5rem;
+}
+
+.nav-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-logo {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--text-color);
+    font-weight: 800;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    position: relative;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    color: var(--text-color);
+    transform: translateY(-2px);
+}
+
+.nav-link:not(.btn-donate):not(.btn-primary):not(.dropbtn)::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 4px;
+    bottom: -6px;
+    left: 0;
+    background-color: var(--text-color);
+    transition: width 0.2s ease;
+}
+
+.nav-link:not(.btn-donate):not(.btn-primary):not(.dropbtn):hover::after {
+    width: 100%;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: var(--surface-color);
+    border: var(--border-dark);
+    box-shadow: var(--shadow-hard-sm);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mobile-menu-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #111111;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--surface-color);
+    border-top: var(--border-dark);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: var(--text-color);
+    font-weight: 700;
+    margin-top: auto;
+}
+
+/* Alerts / Flash Messages */
+.flash-messages {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideInRight 0.3s ease forwards;
+    min-width: 300px;
+}
+
+.alert-success { background-color: #d4edda; color: #155724; border-left: 4px solid var(--primary-color); }
+.alert-danger { background-color: #f8d7da; color: #721c24; border-left: 4px solid var(--danger-color); }
+.alert-warning { background-color: #fff3cd; color: #856404; border-left: 4px solid var(--warning-color); }
+.alert-info { background-color: #d1ecf1; color: #0c5460; border-left: 4px solid var(--secondary-color); }
+
+.close-btn {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-left: 1rem;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Add toggle logic in JS */
+    }
+    .mobile-menu-btn {
+        display: block;
+    }
+}
