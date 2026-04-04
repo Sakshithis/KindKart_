@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Leave a Review{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding-top: 2rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="margin-bottom: 0.5rem;">Rate Donor</h1>
+        <p style="color: var(--text-muted);">How was your experience receiving <strong>{{ item.title }}</strong> from {{ item.donor.username }}?</p>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 2.5rem;">
+            <form method="POST" action="{{ url_for('main.leave_review', item_id=item.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="form-group" style="text-align: center;">
+                    <label>Rating (1-5 Stars)</label>
+                    <div style="font-size: 2rem; color: var(--secondary-color); display: flex; justify-content: center; gap: 0.5rem; cursor: pointer;" id="star-rating">
+                        <i class="fa-regular fa-star" data-val="1"></i>
+                        <i class="fa-regular fa-star" data-val="2"></i>
+                        <i class="fa-regular fa-star" data-val="3"></i>
+                        <i class="fa-regular fa-star" data-val="4"></i>
+                        <i class="fa-regular fa-star" data-val="5"></i>
+                    </div>
+                    <input type="hidden" name="rating" id="rating-input" required>
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label for="comment">Leave a thank you note or comment (Optional)</label>
+                    <textarea id="comment" name="comment" rows="4" placeholder="E.g. The item was in great condition, very polite donor!"></textarea>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline" style="flex: 1; text-align: center;">Cancel</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 2;">Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const stars = document.querySelectorAll('#star-rating i');
+        const ratingInput = document.getElementById('rating-input');
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const val = parseInt(this.getAttribute('data-val'));
+                ratingInput.value = val;
+                
+                // update UI
+                stars.forEach(s => {
+                    const sVal = parseInt(s.getAttribute('data-val'));
+                    if (sVal <= val) {
+                        s.classList.replace('fa-regular', 'fa-solid');
+                    } else {
+                        s.classList.replace('fa-solid', 'fa-regular');
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

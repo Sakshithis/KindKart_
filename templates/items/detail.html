@@ -33,7 +33,27 @@
 
                 <div style="margin-bottom: 2rem; padding: 1rem; background-color: var(--bg-color); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
                     <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-location-dot" style="color: var(--primary-color);"></i> Pickup Location</h4>
-                    <p style="color: var(--text-muted);">{{ item.pickup_location }}</p>
+                    <p id="location-text" style="color: var(--text-muted);">{{ item.pickup_location }}</p>
+                    
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                    <div id="detail-map" style="height: 200px; width: 100%; border-radius: 8px; z-index: 1; display: none;"></div>
+                    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                    <script>
+                        document.addEventListener("DOMContentLoaded", function () {
+                            var locText = "{{ item.pickup_location }}";
+                            // Check if it's coordinates (e.g. "19.0760, 72.8777")
+                            var coords = locText.split(',');
+                            if(coords.length === 2 && !isNaN(parseFloat(coords[0])) && !isNaN(parseFloat(coords[1]))) {
+                                document.getElementById('detail-map').style.display = 'block';
+                                var lat = parseFloat(coords[0].trim());
+                                var lng = parseFloat(coords[1].trim());
+                                var map = L.map('detail-map').setView([lat, lng], 14);
+                                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                                L.marker([lat, lng]).addTo(map).bindPopup("Exact Pickup Location");
+                                document.getElementById('location-text').innerText = "Pinned Location Coordinates";
+                            }
+                        });
+                    </script>
                 </div>
 
                 <div style="margin-bottom: 2.5rem; display: flex; align-items: center; gap: 1rem;">
@@ -41,7 +61,7 @@
                         {{ item.donor.username[0] | upper }}
                     </div>
                     <div>
-                        <p style="font-weight: 600; margin-bottom: 0;">Donated by {{ item.donor.username }}</p>
+                        <p style="font-weight: 600; margin-bottom: 0;">Donated by <a href="{{ url_for('main.user_profile', username=item.donor.username) }}" style="text-decoration: none; color: var(--primary-color);">{{ item.donor.username }}</a></p>
                         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0;"><i class="fa-solid fa-star"></i> {{ item.donor.reputation_score }} Reputation</p>
                     </div>
                 </div>
@@ -62,6 +82,7 @@
                             <button class="btn btn-secondary btn-full" disabled>Item no longer available</button>
                         {% else %}
                             <form method="POST" action="{{ url_for('requests.create_request', item_id=item.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="submit" class="btn btn-primary btn-full" style="font-size: 1.1rem; padding: 1rem;">Request This Item</button>
                             </form>
                         {% endif %}

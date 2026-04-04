@@ -54,7 +54,10 @@ def login():
         if user and bcrypt.check_password_hash(user.password_hash, password):
             login_user(user, remember=request.form.get('remember'))
             next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.index'))
+            import urllib.parse
+            if not next_page or urllib.parse.urlparse(next_page).netloc != '':
+                next_page = url_for('main.index')
+            return redirect(next_page)
         else:
             flash("Login unsuccessful. Please check email and password", "danger")
             

@@ -11,7 +11,7 @@
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-sm);
         border: 1px solid var(--border-color);
-        overflow: hidden;
+        /* Removed overflow:hidden - it was clipping the send button's clickable area */
     }
     .chat-header {
         padding: 1.5rem;
@@ -20,6 +20,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
     .chat-messages {
         flex: 1;
@@ -53,13 +54,42 @@
         border-top: 1px solid var(--border-color);
         display: flex;
         gap: 1rem;
+        align-items: center;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        background: var(--surface-color);
     }
-    .chat-input input {
+    .chat-input input[type="text"] {
         flex: 1;
         padding: 0.75rem 1rem;
-        border: 1px solid var(--border-color);
+        border: 2px solid #111111;
         border-radius: var(--radius-full);
+        font-size: 1rem;
+        box-shadow: none;
+        transform: none !important;
+        width: auto;
     }
+    /* Override brutal btn styles just for chat action buttons */
+    .chat-action-btn {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border-radius: 50%;
+        border: 2px solid #111111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: opacity 0.15s ease;
+        box-shadow: 3px 3px 0px #111111;
+        transform: none !important;
+        position: relative;
+        z-index: 10;
+    }
+    .chat-action-btn:hover { opacity: 0.85; }
+    .chat-action-btn:active { box-shadow: 1px 1px 0px #111111; transform: translate(2px, 2px) !important; }
+    .chat-send-btn { background-color: var(--primary-color); color: white; }
+    .chat-attach-btn { background-color: var(--surface-color); color: #111111; }
 </style>
 {% endblock %}
 
@@ -82,6 +112,7 @@
             </div>
             {% if req.item.donor_id == current_user.id and req.item.status != 'completed' %}
             <form method="POST" action="{{ url_for('requests.complete_request', request_id=req.id) }}" style="margin: 0;" onsubmit="return confirm('Mark donation as completed?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button type="submit" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fa-solid fa-check"></i> Complete Donation</button>
             </form>
             {% endif %}
@@ -91,11 +122,17 @@
             {% for msg in messages %}
                 {% if msg.sender_id == current_user.id %}
                     <div class="message message-self">
+                        {% if msg.attachment_url %}
+                            <div style="margin-bottom: 0.5rem;"><img src="{{ url_for('static', filename='images/uploads/' + msg.attachment_url) }}" style="max-width: 100%; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>
+                        {% endif %}
                         {{ msg.content }}
                     </div>
                 {% else %}
                     <div class="message message-other">
                         <strong>{{ other_user.username }}:</strong><br>
+                        {% if msg.attachment_url %}
+                            <div style="margin-bottom: 0.5rem;"><img src="{{ url_for('static', filename='images/uploads/' + msg.attachment_url) }}" style="max-width: 100%; border-radius: 8px; cursor: pointer;" onclick="window.open(this.src)"></div>
+                        {% endif %}
                         {{ msg.content }}
                     </div>
                 {% endif %}
@@ -103,67 +140,142 @@
         </div>
 
         <div class="chat-input" id="chat-form">
+            <input type="file" id="attachment-input" style="display: none;" accept="image/*">
+            <button type="button" class="chat-action-btn chat-attach-btn" id="attach-btn" onclick="document.getElementById('attachment-input').click()" title="Send Picture">
+                <i class="fa-solid fa-paperclip"></i>
+            </button>
             <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
-            <button class="btn btn-primary" onclick="sendMessage()" style="border-radius: var(--radius-full); width: 50px; height: 50px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="button" class="chat-action-btn chat-send-btn" id="send-btn" title="Send Message">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{# We use the CDN because Flask-SocketIO does not serve socket.io.js by default. We make the JS robust so it works even offline. #}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <script>
-    const socket = io();
-    const room = "{{ req.id }}";
-    const currentUserId = "{{ current_user.id }}";
-    const currentUsername = "{{ current_user.username }}";
-    const otherUsername = "{{ other_user.username }}";
-    
-    socket.on('connect', function() {
-        socket.emit('join', {room: room});
-        scrollToBottom();
-    });
+    // --- Init ---
+    const ROOM  = "{{ req.id }}";
+    const ME_ID = "{{ current_user.id }}";
+    const ME    = "{{ current_user.username }}";
 
-    socket.on('message', function(data) {
-        const messagesDiv = document.getElementById('chat-messages');
-        const div = document.createElement('div');
-        div.classList.add('message');
-        
-        if (data.sender_id == currentUserId) {
-            div.classList.add('message-self');
-            div.innerText = data.msg;
-        } else {
-            div.classList.add('message-other');
-            div.innerHTML = `<strong>${data.username}:</strong><br>${data.msg}`;
-        }
-        
-        messagesDiv.appendChild(div);
-        scrollToBottom();
-    });
+    let chatSocket = null;
+    try {
+        if (typeof io !== 'undefined') {
+            chatSocket = io({ transports: ['polling', 'websocket'] });
 
-    function sendMessage() {
-        const input = document.getElementById('message-input');
-        const msg = input.value.trim();
-        if (msg) {
-            socket.emit('message', {
-                room: room, 
-                message: msg, 
-                sender_id: currentUserId,
-                username: currentUsername
+            chatSocket.on('connect', function() {
+                chatSocket.emit('join', { room: ROOM });
+                scrollToBottom();
             });
-            input.value = '';
+
+            chatSocket.on('connect_error', function(err) {
+                console.error('Socket connect error:', err);
+            });
+
+            // --- Receive message & add to UI ---
+            chatSocket.on('message', function(data) {
+                if (String(data.sender_id) === String(ME_ID)) return;
+                appendMessage(data.username, data.msg, false, data.attachment_url);
+            });
         }
+    } catch(e) {
+        console.error("Socket IO init failed (probably offline). Falling back to HTTP.", e);
     }
 
-    document.getElementById('message-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+
+    // --- Send message via HTTP POST (reliable, no socket dependency) ---
+    function sendMessage() {
+        const input = document.getElementById('message-input');
+        const msg   = input.value.trim();
+        if (!msg) return;
+
+        // Show optimistically on sender's screen immediately
+        appendMessage(ME, msg, true, null);
+        input.value = '';
+        input.focus();
+
+        const fd = new FormData();
+        fd.append('message', msg);
+        fd.append('csrf_token', "{{ csrf_token() }}");
+
+        fetch("{{ url_for('chat.send_message', request_id=req.id) }}", {
+            method: 'POST',
+            body: fd
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Send error:', data.error);
+            }
+        })
+        .catch(err => console.error('Fetch error:', err));
+    }
+
+    // --- Append a message bubble to the chat ---
+    function appendMessage(username, text, isSelf, attachmentUrl) {
+        const messagesDiv = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.classList.add('message', isSelf ? 'message-self' : 'message-other');
+
+        let html = '';
+        if (attachmentUrl) {
+            html += `<div style="margin-bottom:0.5rem"><img src="${attachmentUrl}" style="max-width:100%;border-radius:8px;cursor:pointer" onclick="window.open(this.src)"></div>`;
+        }
+        const safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        html += isSelf ? safe : `<strong>${username}:</strong><br>${safe}`;
+        div.innerHTML = html;
+
+        messagesDiv.appendChild(div);
+        scrollToBottom();
+    }
+
+    // --- Wire up send button & Enter key ---
+    document.getElementById('send-btn').addEventListener('click', sendMessage);
+    document.getElementById('message-input').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
             sendMessage();
         }
     });
 
     function scrollToBottom() {
-        const messagesDiv = document.getElementById('chat-messages');
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const el = document.getElementById('chat-messages');
+        el.scrollTop = el.scrollHeight;
     }
+
+    // --- File attachment upload ---
+    document.getElementById('attachment-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const btn = document.getElementById('attach-btn');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('csrf_token', "{{ csrf_token() }}");
+
+        fetch("{{ url_for('chat.upload_attachment', request_id=req.id) }}", {
+            method: 'POST', body: fd
+        })
+        .then(r => r.json())
+        .then(data => {
+            btn.innerHTML = '<i class="fa-solid fa-paperclip"></i>';
+            if (data.error) {
+                alert('Upload failed: ' + data.error);
+            } else if (data.success && data.attachment_url) {
+                appendMessage(ME, data.msg || 'Sent an attachment', true, data.attachment_url);
+            }
+            e.target.value = '';
+        })
+        .catch(() => {
+            btn.innerHTML = '<i class="fa-solid fa-paperclip"></i>';
+            alert('Upload error. Please try again.');
+        });
+    });
 </script>
 {% endblock %}

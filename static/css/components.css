@@ -24,6 +24,10 @@
     box-shadow: 1px 1px 0px #111111 !important;
 }
 
+.btn i {
+    pointer-events: none;
+}
+
 .btn-primary {
     background-color: var(--primary-color);
     color: #111111 !important;

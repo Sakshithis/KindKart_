@@ -2,6 +2,7 @@ from flask import Blueprint, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from models import db
 from models.models import Request, Item, Notification
+from app import socketio
 
 requests_bp = Blueprint('requests', __name__, url_prefix='/requests')
 
@@ -36,6 +37,7 @@ def create_request(item_id):
     db.session.add(notification)
     
     db.session.commit()
+    socketio.emit('new_notification', {'message': notification.content, 'link': notification.link}, room=f"user_{item.donor_id}")
     flash("Request sent successfully! Wait for the donor to accept.", "success")
     return redirect(url_for('items.detail', item_id=item.id))
 
@@ -50,6 +52,7 @@ def update_request(request_id):
         return redirect(url_for('main.dashboard'))
         
     action = request.form.get('action') # 'accept' or 'reject'
+    notifications_to_emit = []
     
     if action == 'accept':
         req.status = 'accepted'
@@ -65,6 +68,7 @@ def update_request(request_id):
                 link=url_for('items.detail', item_id=item.id)
             )
             db.session.add(notif)
+            notifications_to_emit.append(notif)
             
         # Notify requester
         notif = Notification(
@@ -73,6 +77,7 @@ def update_request(request_id):
             link=url_for('chat.room', request_id=req.id)
         )
         db.session.add(notif)
+        notifications_to_emit.append(notif)
         
         flash("Request accepted. You can now chat with the requester.", "success")
         
@@ -84,9 +89,12 @@ def update_request(request_id):
             link=url_for('items.detail', item_id=item.id)
         )
         db.session.add(notif)
+        notifications_to_emit.append(notif)
         flash("Request rejected.", "info")
         
     db.session.commit()
+    for n in notifications_to_emit:
+        socketio.emit('new_notification', {'message': n.content, 'link': n.link}, room=f"user_{n.user_id}")
     return redirect(url_for('main.dashboard'))
 
 @requests_bp.route('/complete/<int:request_id>', methods=['POST'])

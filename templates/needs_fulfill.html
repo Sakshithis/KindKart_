@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Fulfill Need{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding-top: 2rem;">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h1>You are fulfilling a Need! <i class="fa-solid fa-heart" style="color: var(--danger-color);"></i></h1>
+        <p style="color: var(--text-muted);"><strong>{{ need.user.username }}</strong> requested: <em>"{{
+                need.description }}"</em></p>
+    </div>
+
+    <div class="card">
+        <div class="card-body" style="padding: 2.5rem;">
+            <p>Please briefly describe the exact item you're giving to {{ need.user.username }}. Submitting this form
+                will automatically start a chat room with them!</p>
+            <form method="POST" action="{{ url_for('main.fulfill_need', need_id=need.id) }}"
+                enctype="multipart/form-data" style="margin-top: 1.5rem;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                <div class="form-group">
+                    <label>What are you giving? <span style="color: var(--danger-color);">*</span></label>
+                    <input type="text" name="title" required placeholder="e.g. My old Calculus Textbook">
+                </div>
+
+                <div class="form-group">
+                    <label>Condition <span style="color: var(--danger-color);">*</span></label>
+                    <select name="condition" required>
+                        <option value="" disabled selected>Select condition</option>
+                        <option value="New">New</option>
+                        <option value="Like New">Like New</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>A short message/description <span style="color: var(--danger-color);">*</span></label>
+                    <textarea name="description" rows="3" required
+                        placeholder="Hey, saw you needed this! It has a few highlights but perfectly readable."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload a Photo (Optional)</label>
+                    <input type="file" name="image" accept="image/*" class="form-control"
+                        style="padding: 0.5rem; border: 1px solid var(--border-color); width: 100%; border-radius: var(--radius-sm);">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full"
+                    style="margin-top: 1.5rem; font-size: 1.1rem; padding: 1rem;"><i
+                        class="fa-solid fa-paper-plane"></i> Send to {{ need.user.username }} & Start Chat</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

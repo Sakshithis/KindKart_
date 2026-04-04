@@ -67,7 +67,7 @@
                 </p>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
                     <span style="font-size: 0.85rem; color: var(--text-muted);">
-                        By {{ item.donor.username }}
+                        By <a href="{{ url_for('main.user_profile', username=item.donor.username) }}" style="text-decoration: none; color: inherit;">{{ item.donor.username }}</a>
                     </span>
                     <a href="{{ url_for('items.detail', item_id=item.id) }}" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Details</a>
                 </div>

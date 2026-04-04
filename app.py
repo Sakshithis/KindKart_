@@ -21,6 +21,10 @@ def create_app(config_class=Config):
     socketio.init_app(app)
     bcrypt.init_app(app)
 
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect()
+    csrf.init_app(app)
+
     # Register Blueprints later
     from routes.auth import auth_bp
     from routes.main import main_bp
@@ -48,5 +52,11 @@ def create_app(config_class=Config):
         # Create tables
         from models import models
         db.create_all()
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE message ADD COLUMN attachment_url VARCHAR(255)'))
+            db.session.commit()
+        except:
+            db.session.rollback()
 
     return app

@@ -93,10 +93,12 @@
                         <td style="padding: 1rem; display: flex; gap: 0.5rem;">
                             {% if req.status == 'pending' and req.item.status == 'available' %}
                                 <form method="POST" action="{{ url_for('requests.update_request', request_id=req.id) }}" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                     <input type="hidden" name="action" value="accept">
                                     <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Accept</button>
                                 </form>
                                 <form method="POST" action="{{ url_for('requests.update_request', request_id=req.id) }}" style="display:inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                     <input type="hidden" name="action" value="reject">
                                     <button type="submit" class="btn btn-secondary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Reject</button>
                                 </form>
@@ -104,6 +106,7 @@
                                 <a href="{{ url_for('chat.room', request_id=req.id) }}" class="btn btn-outline" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fa-solid fa-comments"></i> Chat</a>
                                 {% if req.item.status != 'completed' %}
                                 <form method="POST" action="{{ url_for('requests.complete_request', request_id=req.id) }}" style="display:inline;" onsubmit="return confirm('Mark this donation as successfully completed?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                     <button type="submit" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fa-solid fa-check"></i> Complete</button>
                                 </form>
                                 {% endif %}
@@ -141,7 +144,9 @@
                             </span>
                         </td>
                         <td style="padding: 1rem;">
-                            {% if req.status == 'accepted' %}
+                            {% if req.item.status == 'completed' %}
+                                <a href="{{ url_for('main.leave_review', item_id=req.item.id) }}" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i class="fa-solid fa-star"></i> Rate Donor</a>
+                            {% elif req.status == 'accepted' %}
                                 <a href="{{ url_for('chat.room', request_id=req.id) }}" class="btn btn-primary" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Chat with Donor</a>
                             {% else %}
                                 <span style="color: var(--text-muted); font-size: 0.9rem;">Waiting...</span>

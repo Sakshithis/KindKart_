@@ -48,6 +48,7 @@ class Request(db.Model):
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text, nullable=False)
+    attachment_url = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     request_id = db.Column(db.Integer, db.ForeignKey('request.id'))
@@ -68,3 +69,16 @@ class Wishlist(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    rating = db.Column(db.Integer, nullable=False) # 1 to 5
+    comment = db.Column(db.String(500))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    reviewed_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+
+    reviewer = db.relationship('User', foreign_keys=[reviewer_id])
+    reviewed = db.relationship('User', foreign_keys=[reviewed_id], backref=db.backref('reviews_received', lazy='dynamic'))

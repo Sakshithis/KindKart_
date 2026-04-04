@@ -35,9 +35,11 @@ def browse():
     elif sort == 'oldest':
         query = query.order_by(Item.created_at.asc())
 
-    items = query.all()
-    return render_template('items/browse.html', items=items, search=search, category=category, sort=sort)
-
+    page = request.args.get('page', 1, type=int)
+    pagination = query.paginate(page=page, per_page=12, error_out=False)
+    items = pagination.items
+    
+    return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort)
 @items_bp.route('/donate', methods=['GET', 'POST'])
 @login_required
 def donate():
@@ -56,7 +58,21 @@ def donate():
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             # Ensure folder exists
             os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            file.save(filepath)
+            
+            # Use Pillow to compress and resize image
+            from PIL import Image
+            img = Image.open(file)
+            
+            # Convert to RGB if it's RGBA (e.g. from PNG) before saving as JPEG
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+                
+            # Resize keeping aspect ratio
+            max_size = (800, 800)
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+            
+            # Save optimized
+            img.save(filepath, optimize=True, quality=85)
 
         item = Item(
             title=title,

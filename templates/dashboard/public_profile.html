@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }}'s Profile{% endblock %}
+
+{% block content %}
+<div class="profile-header" style="text-align: center; margin-bottom: 2rem;">
+    <div style="width: 100px; height: 100px; border-radius: 50%; background-color: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; margin: 0 auto 1rem auto; box-shadow: var(--shadow-md);">
+        {{ user.username[0] | upper }}
+    </div>
+    <h1>{{ user.username }}</h1>
+    <p style="color: var(--text-muted);"><i class="fa-solid fa-location-dot"></i> {{ user.location }}</p>
+    
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1.5rem;">
+        <div class="stat-box" style="text-align: center; padding: 1rem 2rem; background: white; border-radius: 10px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #f39c12;">
+                {% if avg_rating > 0 %}
+                    {{ avg_rating }} <i class="fa-solid fa-star" style="font-size: 1rem;"></i>
+                {% else %}
+                    -
+                {% endif %}
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Rating</div>
+        </div>
+        <div class="stat-box" style="text-align: center; padding: 1rem 2rem; background: white; border-radius: 10px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary-color);">{{ user.reputation_score }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Reputation</div>
+        </div>
+        <div class="stat-box" style="text-align: center; padding: 1rem 2rem; background: white; border-radius: 10px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; font-weight: bold; color: var(--secondary-color);">{{ user.items_donated_count }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Donations</div>
+        </div>
+        <div class="stat-box" style="text-align: center; padding: 1rem 2rem; background: white; border-radius: 10px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #27ae60;">{{ user.people_helped_count }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Helped</div>
+        </div>
+    </div>
+</div>
+
+<div class="user-reviews" style="margin-top: 3rem;">
+    <h2>Trust Reviews</h2>
+    <hr style="border: 0; border-top: 2px solid var(--border-color); margin-bottom: 2rem; width: 50px; margin-left: 0;">
+    {% if reviews %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for review in reviews %}
+            <div class="card" style="background-color: var(--bg-color); border: none;">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <strong>{{ review.reviewer.username }}</strong>
+                        <span style="color: #f39c12;">
+                            {% for i in range(review.rating) %}<i class="fa-solid fa-star"></i>{% endfor %}{% for i in range(5 - review.rating) %}<i class="fa-regular fa-star"></i>{% endfor %}
+                        </span>
+                    </div>
+                    {% if review.comment %}
+                    <p style="color: var(--text-color); font-style: italic;">"{{ review.comment }}"</p>
+                    {% endif %}
+                    <small style="color: var(--text-muted);">{{ review.created_at.strftime('%b %d, %Y') }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: var(--text-muted);">No reviews yet.</p>
+    {% endif %}
+</div>
+
+<div class="user-items" style="margin-top: 3rem;">
+    <h2>Available Items by {{ user.username }}</h2>
+    <hr style="border: 0; border-top: 2px solid var(--border-color); margin-bottom: 2rem; width: 50px; margin-left: 0;">
+    
+    {% if items %}
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem;">
+        {% for item in items %}
+        <div class="card">
+            <div style="position: relative;">
+                <img src="{{ url_for('static', filename='images/uploads/' + (item.image_url if item.image_url else 'placeholder.jpg')) }}" class="card-img-top" alt="{{ item.title }}" onerror="this.src='https://placehold.co/600x400/eeeeee/2ecc71?text=No+Image'">
+                <span class="badge badge-secondary" style="position: absolute; top: 10px; right: 10px; z-index: 10; box-shadow: var(--shadow-sm); background: white;">{{ item.category }}</span>
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">{{ item.title }}</h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;"><i class="fa-solid fa-location-dot"></i> {{ item.pickup_location }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <a href="{{ url_for('items.detail', item_id=item.id) }}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; width: 100%;">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card" style="text-align: center; padding: 3rem; background: var(--bg-color); border-style: dashed;">
+        <i class="fa-solid fa-box-open" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem;"></i>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 0;">{{ user.username }} has no available items right now.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

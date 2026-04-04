@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+venv/
+kindkart.db
+.env
+.DS_Store
+
+# Ignore uploaded images so they don't bloat the repo, except our logo
+static/images/uploads/*
+!static/images/uploads/.gitkeep

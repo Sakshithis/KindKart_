@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Community Needs Board{% endblock %}
+
+{% block content %}
+<div class="needs-header" style="text-align: center; margin-bottom: 3rem;">
+    <h1>Community Needs Board</h1>
+    <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">See what people in your community are looking for. If you have an item someone desperately needs, click "I have this!" to start a chat and offer it to them.</p>
+</div>
+
+{% if current_user.is_authenticated %}
+<div class="card" style="max-width: 600px; margin: 0 auto 3rem auto; background-color: var(--bg-color); border: 1px solid var(--primary-color);">
+    <div class="card-body">
+        <h4 style="margin-bottom: 1rem;"><i class="fa-solid fa-hand-holding-hand" style="color: var(--primary-color);"></i> Request an Item</h4>
+        <form method="POST" action="{{ url_for('main.add_need') }}" style="display: flex; gap: 1rem;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="text" name="description" required placeholder="e.g. I desperately need a Calculus II textbook for college..." style="flex: 1;">
+            <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Post Need</button>
+        </form>
+    </div>
+</div>
+{% else %}
+<div style="text-align: center; margin-bottom: 3rem;">
+    <p><a href="{{ url_for('auth.login', next=request.path) }}">Log in</a> to post a request to the Needs board.</p>
+</div>
+{% endif %}
+
+<div class="needs-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+    {% if needs %}
+        {% for need in needs %}
+        <div class="card" style="box-shadow: var(--shadow-sm); border-left: 4px solid var(--secondary-color);">
+            <div class="card-body" style="padding: 1.5rem;">
+                <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; flex-shrink: 0;">
+                        {{ need.user.username[0] | upper }}
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-size: 1.1rem;">
+                            <a href="{{ url_for('main.user_profile', username=need.user.username) }}" style="text-decoration: none; color: inherit;">{{ need.user.username }}</a>
+                        </h4>
+                        <small style="color: var(--text-muted);"><i class="fa-solid fa-location-dot"></i> {{ need.user.location }} &bull; {{ need.created_at.strftime('%b %d') }}</small>
+                    </div>
+                </div>
+                
+                <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                    "{{ need.description }}"
+                </p>
+                
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    {% if current_user.is_authenticated and current_user.id == need.user_id %}
+                        <!-- Self Need -->
+                        <span class="badge badge-secondary" style="background-color: var(--bg-color); color: var(--text-muted);">Your Request</span>
+                        <form method="POST" action="{{ url_for('main.delete_need', need_id=need.id) }}" style="margin: 0;" onsubmit="return confirm('Delete this request?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline" style="padding: 0.3rem 0.6rem; color: var(--danger-color); border-color: var(--danger-color);"><i class="fa-solid fa-trash"></i> Delete</button>
+                        </form>
+                    {% else %}
+                        <!-- Other User Need -->
+                        <a href="{{ url_for('main.user_profile', username=need.user.username) }}" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">View Profile</a>
+                        <a href="{{ url_for('main.fulfill_need', need_id=need.id) }}" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fa-solid fa-hand-holding-heart"></i> I have this! (Start Chat)</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: var(--bg-color); border-radius: var(--radius-md);">
+            <i class="fa-solid fa-check-circle" style="font-size: 3rem; color: var(--secondary-color); margin-bottom: 1rem;"></i>
+            <h3>No Active Needs</h3>
+            <p style="color: var(--text-muted);">The community's wishlist is currently empty!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
