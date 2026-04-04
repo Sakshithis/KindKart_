@@ -5,20 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mobileMenuBtn) {
         mobileMenuBtn.addEventListener('click', () => {
-            if (navLinks.style.display === 'flex') {
-                navLinks.style.display = 'none';
-            } else {
-                navLinks.style.display = 'flex';
-                navLinks.style.flexDirection = 'column';
-                navLinks.style.position = 'absolute';
-                navLinks.style.top = '100%';
-                navLinks.style.left = '0';
-                navLinks.style.right = '0';
-                navLinks.style.backgroundColor = 'var(--surface-color)';
-                navLinks.style.padding = '1rem';
-                navLinks.style.boxShadow = 'var(--shadow-md)';
-                navLinks.style.zIndex = '1000';
-            }
+            navLinks.classList.toggle('active');
         });
     }
 

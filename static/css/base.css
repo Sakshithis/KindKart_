@@ -228,10 +228,36 @@ a:hover {
 }
 
 @media (max-width: 768px) {
+    .main-content {
+        padding: 1.5rem 1rem;
+    }
     .nav-links {
-        display: none; /* Add toggle logic in JS */
+        display: none; 
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--accent-color);
+        padding: 1.5rem;
+        border: var(--border-dark);
+        border-top: none;
+        box-shadow: var(--shadow-hard-md);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        z-index: 1000;
+    }
+    .nav-links.active {
+        display: flex;
+    }
+    .nav-link {
+        width: 100%;
+        text-align: left;
     }
     .mobile-menu-btn {
         display: block;
+    }
+    .navbar {
+        margin: 1rem;
+        border-radius: var(--radius-md);
     }
 }
