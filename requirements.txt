@@ -10,3 +10,4 @@ Flask-WTF==1.2.1
 Pillow
 eventlet
 gunicorn
+psycopg2-binary
