@@ -42,14 +42,13 @@
     <div class="card">
         <div class="card-body" style="padding: 2rem;">
             <h2>Account Settings</h2>
-            <form style="margin-top: 1.5rem;">
+            <div style="margin-top: 1.5rem;">
                 <div class="form-group">
-                    <label>Email Address (Cannot be changed)</label>
+                    <label>Email Address</label>
                     <input type="email" value="{{ user.email }}" disabled style="background-color: var(--bg-color);">
                 </div>
-                <!-- In a real app we'd have a bio or update form here -->
-                <p style="color: var(--text-muted); font-size: 0.9rem;">* Contact support to change account details.</p>
-            </form>
+                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-outline"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+            </div>
         </div>
     </div>
 </div>

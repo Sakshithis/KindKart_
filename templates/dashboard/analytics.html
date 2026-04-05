@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Open Analytics{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width: 1000px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <i class="fa-solid fa-chart-pie" style="font-size: 4rem; color: var(--secondary-color); margin-bottom: 1rem;"></i>
+        <h1>Platform Analytics</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Transparent metrics on how KindKart is impacting the community.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+        <!-- Pie Chart -->
+        <div class="card">
+            <div class="card-body" style="padding: 2rem;">
+                <h3 style="text-align: center; margin-bottom: 2rem;">Items by Category</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bar Chart -->
+        <div class="card">
+            <div class="card-body" style="padding: 2rem;">
+                <h3 style="text-align: center; margin-bottom: 2rem;">System Activity</h3>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Safe Neo-Brutalist Colors
+        const colors = [
+            '#FF69B4', // Pink
+            '#00E5FF', // Cyan
+            '#FFE600', // Yellow
+            '#00E676', // Green
+            '#FF3D00'  // Red
+        ];
+        
+        // Setup Category Chart
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Clothes', 'Books', 'Electronics', 'Furniture', 'Others'],
+                datasets: [{
+                    data: {{ cat_data | tojson }},
+                    backgroundColor: colors,
+                    borderColor: '#111111',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { family: 'Outfit', weight: 'bold' }, color: '#111' } }
+                }
+            }
+        });
+
+        // Setup Activity Chart
+        const actCtx = document.getElementById('activityChart').getContext('2d');
+        new Chart(actCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Users', 'Items Listed', 'Total Requests', 'Successful Exchanges'],
+                datasets: [{
+                    label: 'Count',
+                    data: {{ sys_data | tojson }},
+                    backgroundColor: '#00E5FF',
+                    borderColor: '#111111',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#ddd' }, ticks: { font: { family: 'Outfit', weight: 'bold' } } },
+                    x: { grid: { display: false }, ticks: { font: { family: 'Outfit', weight: 'bold' } } }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from models import db
 from models.models import Item, Request
 import time
+from datetime import datetime, timedelta
 
 items_bp = Blueprint('items', __name__, url_prefix='/items')
 
@@ -17,6 +18,9 @@ def allowed_file(filename):
 @items_bp.route('/')
 def browse():
     query = Item.query.filter_by(status='available')
+    
+    # Hide expired items
+    query = query.filter((Item.expires_at == None) | (Item.expires_at > datetime.utcnow()))
     
     # Search
     search = request.args.get('search')
@@ -35,11 +39,16 @@ def browse():
     elif sort == 'oldest':
         query = query.order_by(Item.created_at.asc())
 
+    # Near Me Filter
+    near_me = request.args.get('near_me')
+    if near_me == 'true' and current_user.is_authenticated and current_user.location:
+        query = query.filter(Item.pickup_location.ilike(f'%{current_user.location}%'))
+
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page=page, per_page=12, error_out=False)
     items = pagination.items
     
-    return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort)
+    return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort, near_me=near_me, utcnow=datetime.utcnow(), timedelta=timedelta)
 @items_bp.route('/donate', methods=['GET', 'POST'])
 @login_required
 def donate():
@@ -74,6 +83,12 @@ def donate():
             # Save optimized
             img.save(filepath, optimize=True, quality=85)
 
+        # Handle Expiry
+        expires_in_days_input = request.form.get('expires_in_days')
+        expires_at = None
+        if expires_in_days_input and expires_in_days_input.isdigit():
+            expires_at = datetime.utcnow() + timedelta(days=int(expires_in_days_input))
+
         item = Item(
             title=title,
             category=category,
@@ -81,6 +96,7 @@ def donate():
             condition=condition,
             pickup_location=pickup_location,
             image_url=filename,
+            expires_at=expires_at,
             donor_id=current_user.id
         )
         db.session.add(item)

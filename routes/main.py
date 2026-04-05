@@ -34,6 +34,31 @@ def dashboard():
 def profile():
     return render_template('dashboard/profile.html', user=current_user)
 
+@main_bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    from flask import request, flash, redirect, url_for
+    from models import db
+    from models.models import User
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        location = request.form.get('location')
+        
+        # Check username uniqueness
+        existing = User.query.filter_by(username=username).first()
+        if existing and existing.id != current_user.id:
+            flash('Username is already taken by someone else.', 'danger')
+            return redirect(url_for('main.edit_profile'))
+            
+        current_user.username = username
+        current_user.location = location
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('main.profile'))
+        
+    return render_template('dashboard/edit_profile.html')
+
 @main_bp.route('/user/<username>')
 def user_profile(username):
     from models.models import User, Review
@@ -149,6 +174,10 @@ def fulfill_need(need_id):
         )
         db.session.add(notif)
         
+        # Add 20 Reputation Points for fulfilling a need
+        current_user.reputation_score += 20
+        current_user.items_donated_count += 1
+        
         # 4. Remove from Needs Board
         db.session.delete(need)
         db.session.commit()
@@ -189,3 +218,38 @@ def leave_review(item_id):
             return redirect(url_for('main.dashboard'))
             
     return render_template('dashboard/review.html', item=item)
+
+@main_bp.route('/leaderboard')
+def leaderboard():
+    from models.models import User
+    top_users = User.query.order_by(User.reputation_score.desc()).limit(10).all()
+    return render_template('dashboard/leaderboard.html', top_users=top_users)
+
+@main_bp.route('/certificate')
+@login_required
+def certificate():
+    from flask import flash, redirect, url_for
+    from models.models import User
+    top_user = User.query.order_by(User.reputation_score.desc()).first()
+    if not top_user or current_user.id != top_user.id:
+        flash('Certificates are only awarded to the #1 Philanthropist.', 'warning')
+        return redirect(url_for('main.leaderboard'))
+    return render_template('dashboard/certificate.html', user=top_user)
+@main_bp.route('/analytics')
+def analytics():
+    from models.models import Item, User, Request
+    clothes = Item.query.filter_by(category='Clothes').count()
+    books = Item.query.filter_by(category='Books').count()
+    electronics = Item.query.filter_by(category='Electronics').count()
+    furniture = Item.query.filter_by(category='Furniture').count()
+    others = Item.query.filter_by(category='Others').count()
+    
+    total_users = User.query.count()
+    total_items = Item.query.count()
+    total_requests = Request.query.count()
+    completed_requests = Request.query.filter_by(status='accepted').count()
+    
+    return render_template('dashboard/analytics.html', 
+        cat_data=[clothes, books, electronics, furniture, others],
+        sys_data=[total_users, total_items, total_requests, completed_requests]
+    )

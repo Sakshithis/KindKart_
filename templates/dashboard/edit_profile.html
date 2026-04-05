@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 2rem 0;">
+    <div class="card">
+        <div class="card-body" style="padding: 2.5rem;">
+            <h2 style="margin-bottom: 2rem; text-align: center;">Edit Profile</h2>
+            <form method="POST" action="{{ url_for('main.edit_profile') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" value="{{ current_user.username }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" name="location" value="{{ current_user.location }}" required>
+                    <small style="color: var(--text-muted);">E.g. Delhi, Sector 14, etc. Used for the "Near Me" filter.</small>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <a href="{{ url_for('main.profile') }}" class="btn btn-outline" style="flex: 1;">Cancel</a>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

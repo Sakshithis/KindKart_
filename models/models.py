@@ -30,8 +30,19 @@ class Item(db.Model):
     pickup_location = db.Column(db.String(120), nullable=False)
     status = db.Column(db.String(64), default='available') # available, pending, completed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=True)
     donor_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     
+    def get_smart_tags(self):
+        if not self.description: return []
+        full_text = f"{self.title.lower()} {self.description.lower()}"
+        keywords = ['winter', 'summer', 'cotton', 'wooden', 'xl', 'large', 'small', 'electronic', 'smartphone', 'urgent', 'kids', 'men', 'women', 'glass', 'metal', 'plastic', 'new']
+        tags = []
+        for word in keywords:
+            if word in full_text:
+                tags.append(word.title())
+        return tags
+
     requests = db.relationship('Request', backref='item', lazy='dynamic')
 
 class Request(db.Model):

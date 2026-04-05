@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Appreciation</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,600;1,600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            color: #111;
+        }
+
+        .certificate-wrapper {
+            background: #fff;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+
+        .certificate {
+            background: #fff;
+            border: 15px solid #FF69B4;
+            padding: 50px;
+            width: 800px;
+            max-width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        
+        .certificate::before {
+            content: '';
+            position: absolute;
+            top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 3px solid #00E5FF;
+            pointer-events: none;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            color: #111;
+            margin: 0 0 20px 0;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .name {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: #FF69B4;
+            margin: 0 0 30px 0;
+            font-style: italic;
+            border-bottom: 2px solid #ddd;
+            display: inline-block;
+            padding: 0 40px 10px 40px;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #444;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 50px;
+            padding: 0 40px;
+        }
+
+        .signature {
+            border-top: 2px solid #111;
+            padding-top: 10px;
+            width: 250px;
+        }
+
+        .signature-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .handwriting {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3.5rem;
+            color: #111;
+            margin-bottom: -10px;
+            transform: rotate(-5deg);
+            display: inline-block;
+        }
+
+        .seal {
+            width: 120px;
+            height: 120px;
+            background: #FFE600;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.5rem;
+            border: 4px solid #111;
+            text-transform: uppercase;
+            text-align: center;
+            line-height: 1.2;
+            transform: rotate(-15deg);
+        }
+
+        @media print {
+            body { background: white; }
+            .certificate-wrapper { box-shadow: none; padding: 0; }
+            .btn-print { display: none !important; }
+        }
+        
+        .btn-print {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #111;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-print:hover { background: #333; }
+    </style>
+</head>
+<body>
+    <button class="btn-print" onclick="window.print()">🖨️ Print Certificate</button>
+    <div class="certificate-wrapper">
+        <div class="certificate">
+            <div class="logo">KindKart</div>
+            <h1 class="title">Certificate of Appreciation</h1>
+            <div class="subtitle">Proudly Presented To</div>
+            <h2 class="name">{{ user.username }}</h2>
+            <p class="description">
+                In recognition of achieving the remarkable status of <strong>Top Philanthropist</strong>. 
+                Your selfless donations ({{ user.items_donated_count }} items) and exceptional commitment to our community have significantly helped reduce waste and uplift the lives of those in need.
+            </p>
+            
+            <div class="footer">
+                <div>
+                    <div class="signature-text" style="font-size: 1rem; color: #666; margin-bottom: 10px;">System Administrator</div>
+                    <div class="handwriting">KindKart Team</div>
+                    <div class="signature">Authorized Signature</div>
+                </div>
+                
+                <div class="seal">
+                    Top<br>Donor<br>2026
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

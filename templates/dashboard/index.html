@@ -2,9 +2,14 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard-header" style="margin-bottom: 2rem;">
-    <h1>My Dashboard</h1>
-    <p>Manage your donations, requests, and impact.</p>
+<div class="dashboard-header" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <h1>My Dashboard</h1>
+        <p>Manage your donations, requests, and impact.</p>
+    </div>
+    <a href="{{ url_for('main.leaderboard') }}" class="btn" style="background-color: var(--warning-color); color: #111; font-weight: bold; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: var(--radius-md); border: var(--border-dark); box-shadow: var(--shadow-hard-sm);">
+        <i class="fa-solid fa-trophy"></i> View Leaderboard
+    </a>
 </div>
 
 <div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">

@@ -28,9 +28,19 @@
 
                 <div style="margin-bottom: 2rem;">
                     <h3>Description</h3>
-                    <p style="color: var(--text-color); line-height: 1.7;">{{ item.description }}</p>
+                    <p style="margin-bottom: 1.5rem; font-size: 1.1rem; line-height: 1.6;">{{ item.description }}</p>
+                
+                {% set tags = item.get_smart_tags() %}
+                {% if tags %}
+                <div style="margin-bottom: 2rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <strong style="margin-right: 0.5rem;">Auto-Tags:</strong>
+                    {% for tag in tags %}
+                    <span style="background: var(--bg-color); color: var(--text-color); padding: 0.3rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 700; border: 1px solid var(--border-color);">#{{ tag }}</span>
+                    {% endfor %}
                 </div>
-
+                {% endif %}
+                
+                <h3 style="margin-bottom: 1rem;">Details</h3>
                 <div style="margin-bottom: 2rem; padding: 1rem; background-color: var(--bg-color); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
                     <h4 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-location-dot" style="color: var(--primary-color);"></i> Pickup Location</h4>
                     <p id="location-text" style="color: var(--text-muted);">{{ item.pickup_location }}</p>

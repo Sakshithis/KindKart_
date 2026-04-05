@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Top Philanthropists{% endblock %}
+
+{% block content %}
+<div class="main-content" style="max-width: 800px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <i class="fa-solid fa-trophy" style="font-size: 4rem; color: var(--warning-color); margin-bottom: 1rem;"></i>
+        <h1>KindKart Leaderboard</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Honoring those who make the biggest difference in our community.</p>
+    </div>
+
+    <div class="card">
+        <ul style="list-style: none; margin: 0; padding: 0;">
+            {% for user in top_users %}
+            <li style="display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid var(--border-color); {% if loop.index == 1 %}background-color: #FFF9E6;{% endif %}">
+                
+                <div style="display: flex; align-items: center; gap: 1.5rem;">
+                    <!-- Rank Indicator -->
+                    <div style="font-size: 1.5rem; font-weight: 900; color: var(--text-muted); width: 30px; text-align: center;">
+                        #{{ loop.index }}
+                    </div>
+                    
+                    <!-- Avatar -->
+                    <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--{% if loop.index == 1 %}warning{% elif loop.index == 2 %}secondary{% elif loop.index == 3 %}danger{% else %}primary{% endif %}-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; border: 2px solid var(--text-color);">
+                        {{ user.username[0] | upper }}
+                    </div>
+
+                    <!-- Details -->
+                    <div>
+                        <h3 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <a href="{{ url_for('main.user_profile', username=user.username) }}" style="color: var(--text-color);">{{ user.username }}</a>
+                            {% if loop.index == 1 %}👑{% endif %}
+                            {% if loop.index == 2 %}🥈{% endif %}
+                            {% if loop.index == 3 %}🥉{% endif %}
+                        </h3>
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">{{ user.items_donated_count }} items donated</p>
+                    </div>
+                </div>
+
+                <!-- Score -->
+                <div style="text-align: right;">
+                    <div style="font-size: 1.8rem; font-weight: 900; color: var(--primary-color);">{{ user.reputation_score }}</div>
+                    <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 800;">Points</div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if current_user.is_authenticated and top_users and current_user.id == top_users[0].id %}
+    <div style="margin-top: 3rem; text-align: center; background: var(--surface-color); padding: 3rem; border: var(--border-dark); box-shadow: var(--shadow-hard-md); border-radius: var(--radius-lg);">
+        <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Congratulations, Champion!</h2>
+        <p style="margin-bottom: 2rem;">You are currently ranked #1. As a token of our appreciation, you can claim your official KindKart Donation Certificate.</p>
+        <a href="{{ url_for('main.certificate') }}" class="btn btn-primary btn-full" style="font-size: 1.2rem; padding: 1rem;">📄 Download Official Certificate</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
