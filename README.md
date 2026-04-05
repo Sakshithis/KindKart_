@@ -3,7 +3,8 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Flask](https://img.shields.io/badge/Framework-Flask-green)
 ![WebSockets](https://img.shields.io/badge/RealTime-Socket.IO-orange)
-![Database](https://img.shields.io/badge/Database-SQLite-lightgrey)
+![Database](https://img.shields.io/badge/Database-PostgreSQL-blue)
+![UI](https://img.shields.io/badge/UI-Neobrutalism-ff69b4)
 
 KindKart is an immersive, full-stack web application built to facilitate **community-driven resource allocation**. It functions as an interactive platform where users can donate essential items, respond to local needs, and communicate securely in real-time. Designed as a comprehensive academic project, it showcases robust MVC web architecture, real-time bidirectional communication, and secure relational data modeling.
 
@@ -20,7 +21,7 @@ Unlike traditional HTTP systems, KindKart utilizes an **Eventlet-powered WebSock
 sequenceDiagram
     participant Sender as User A (Browser)
     participant Server as Flask + Socket.IO
-    participant DB as SQLite Database
+    participant DB as PostgreSQL
     participant Receiver as User B (Browser)
 
     Sender->>Server: HTTP POST (sendMessage)
@@ -37,7 +38,7 @@ sequenceDiagram
 ```mermaid
 graph TD
     A[Client UI / Browser] -->|HTTP Requests| B[Flask Router / Blueprints]
-    B -->|Database Queries| C[(SQLite Database)]
+    B -->|Database Queries| C[(PostgreSQL / SQLite)]
     C -->|ORM Objects| B
     B -->|Jinja2 Templates| A
     
@@ -52,15 +53,17 @@ graph TD
 1. **🔐 Secure Authentication Pipeline**
    - Robust CSRF validation, password hashing via `Bcrypt`, and session continuity using `Flask-Login`.
 2. **📢 Dynamic Needs Board & Matchmaking**
-   - A centralized hub where individuals broadcast requirements, and donors directly fulfill those needs through verified transaction protocols.
+   - A centralized hub where individuals broadcast requirements, and donors directly fulfill those needs. Fulfilling needs instantly grants an elevated +20 Reputation Score bonus.
 3. **⚡ Real-Time Socket.IO Communication**
    - Persistent bi-directional chat rooms connecting donors and recipients instantly, built on an asynchronous Eventlet engine.
-4. **📸 Automated Media Optimization (Pillow)**
-   - Smart image processing that automatically compresses, scales, and optimally stores uploaded files to limit bandwidth.
-5. **⭐ Trust & Reputation Engine**
-   - A multi-tier review system allowing users to award ratings (1-5 stars) dynamically, establishing a cumulative, visible community trust score.
-6. **📍 Geospatial Asset Mapping**
-   - Integration with `Leaflet.js` to render interactive mapping nodes for visualizing physical pickup constraints.
+4. **📊 Analytics & Admin Dashboard**
+   - Live system-wide metrics integrated with `Chart.js` rendering rich visual analytics for data categories and user engagement ratios.
+5. **🏆 Advanced Gamification Engine**
+   - Live algorithmic Leaderboard ranking top philanthropists, paired with a dynamically generated, printable "Certificate of Appreciation" for the absolute #1 ranked user.
+6. **🤖 Smart Tagging & Algorithmic Filtering**
+   - Heuristical text-processing generating dynamic keywords (Smart Tags), alongside advanced contextual tools like "Near Me" location filtering and an automated "Item Expiry" chron-engine.
+7. **🎨 Neo-Brutalist Global Design**
+   - High-contrast, accessibility-friendly UI with an interactive, natively styled **Global Dark Mode** powered by `localStorage` persistence and dynamic CSS Variables.
 
 ---
 
@@ -69,10 +72,10 @@ graph TD
 | Layer | Technologies Used |
 | :--- | :--- |
 | **Backend Framework** | Python 3.8+, Flask, Jinja2 |
-| **Database & ORM** | SQLite, SQLAlchemy (`Flask-SQLAlchemy`) |
+| **Database & ORM** | PostgreSQL (Production), SQLite (Local), `Flask-SQLAlchemy` |
 | **Real-Time Engine** | `Flask-SocketIO`, `eventlet` |
 | **Security & Auth** | `Flask-Bcrypt`, `Flask-WTF`, CSRF Protection |
-| **Frontend Utilities** | HTML5, CSS3, Vanilla JS, Google Fonts, FontAwesome |
+| **Frontend Utilities** | Vanilla JS, Chart.js, Neo-Brutalist CSS, Google Fonts |
 | **Deployment Engine** | `Gunicorn` (WSGI Production Server) |
 
 ---
@@ -116,6 +119,7 @@ To transition from localhost to a permanent live cloud server with real-time Web
       ```bash
       gunicorn --worker-class eventlet -w 1 run:app
       ```
+    - **Environment Variables**: MUST set `DATABASE_URL` with your PostgreSQL internal/external string. (e.g. `postgresql://user:pass@host/dbname`)
 3. **Custom Domain (Optional)**:
     - In Render Dashboard -> Settings -> Custom Domains, input your premium domain and copy the generated DNS records to your registrar. The platform provisions SSL certificates automatically!
 

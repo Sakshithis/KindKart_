@@ -1,8 +1,17 @@
-from flask import Blueprint, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for, abort
 from flask_login import login_required, current_user
 from models.models import Item, Request
+from functools import wraps
 
 main_bp = Blueprint('main', __name__)
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or current_user.username.lower() != 'admin':
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
 
 @main_bp.route('/')
 def index():
@@ -236,6 +245,8 @@ def certificate():
         return redirect(url_for('main.leaderboard'))
     return render_template('dashboard/certificate.html', user=top_user)
 @main_bp.route('/analytics')
+@login_required
+@admin_required
 def analytics():
     from models.models import Item, User, Request
     clothes = Item.query.filter_by(category='Clothes').count()

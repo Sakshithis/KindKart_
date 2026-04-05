@@ -66,4 +66,12 @@ def create_app(config_class=Config):
         except:
             db.session.rollback()
 
+        # Securely auto-inject the admin user so nobody else can claim it
+        from models.models import User
+        if not User.query.filter_by(username='admin').first():
+            hashed_admin_pass = bcrypt.generate_password_hash('Admin@KindKart2026').decode('utf-8')
+            sys_admin = User(username='admin', email='admin@kindkart.com', password_hash=hashed_admin_pass, location='KindKart HQ', reputation_score=1000)
+            db.session.add(sys_admin)
+            db.session.commit()
+
     return app
