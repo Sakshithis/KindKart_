@@ -61,7 +61,7 @@ def create_app(config_class=Config):
             
         try:
             from sqlalchemy import text
-            db.session.execute(text('ALTER TABLE item ADD COLUMN expires_at DATETIME'))
+            db.session.execute(text('ALTER TABLE item ADD COLUMN expires_at TIMESTAMP'))
             db.session.commit()
         except:
             db.session.rollback()
