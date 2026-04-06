@@ -51,16 +51,31 @@
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
                             var locText = "{{ item.pickup_location }}";
-                            // Check if it's coordinates (e.g. "19.0760, 72.8777")
                             var coords = locText.split(',');
+                            
                             if(coords.length === 2 && !isNaN(parseFloat(coords[0])) && !isNaN(parseFloat(coords[1]))) {
+                                // Directly show coordinate-based map
                                 document.getElementById('detail-map').style.display = 'block';
                                 var lat = parseFloat(coords[0].trim());
                                 var lng = parseFloat(coords[1].trim());
                                 var map = L.map('detail-map').setView([lat, lng], 14);
                                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                                 L.marker([lat, lng]).addTo(map).bindPopup("Exact Pickup Location");
-                                document.getElementById('location-text').innerText = "Pinned Location Coordinates";
+                                document.getElementById('location-text').innerText = "Pinned Coordinates: " + lat.toFixed(4) + ", " + lng.toFixed(4);
+                            } else {
+                                // Automatically Geocode user's text address
+                                fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(locText))
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data && data.length > 0) {
+                                            document.getElementById('detail-map').style.display = 'block';
+                                            var lat = parseFloat(data[0].lat);
+                                            var lng = parseFloat(data[0].lon);
+                                            var map = L.map('detail-map').setView([lat, lng], 14);
+                                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                                            L.marker([lat, lng]).addTo(map).bindPopup("Approximate: " + locText);
+                                        }
+                                    }).catch(err => console.log('Geocoding detail error:', err));
                             }
                         });
                     </script>

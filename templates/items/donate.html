@@ -60,7 +60,10 @@
 
                 <div class="form-group">
                     <label for="pickup_location">Pickup Location <span style="color: var(--danger-color);">*</span></label>
-                    <input type="text" id="pickup_location" name="pickup_location" value="{{ current_user.location }}" required placeholder="e.g. Mumbai, or click on the map">
+                    <div style="display: flex; gap: 10px; margin-bottom: 5px;">
+                        <input type="text" id="pickup_location" name="pickup_location" value="{{ current_user.location }}" required placeholder="e.g. Mumbai, or click on the map" style="flex: 1; margin-bottom: 0;">
+                        <button type="button" id="detect-loc-btn" class="btn btn-secondary" style="white-space: nowrap; padding: 0.75rem 1rem;"><i class="fa-solid fa-location-crosshairs"></i> Use My Location</button>
+                    </div>
                     <small style="color: var(--text-muted); display: block; margin-top: 5px;">A safe public place is recommended.</small>
                     <!-- Leaflet JS Map Integration -->
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -74,11 +77,64 @@
                             }).addTo(map);
 
                             var marker;
-                            map.on('click', function(e) {
+                            
+                            function updateLocation(lat, lng) {
+                                map.setView([lat, lng], 15);
                                 if (marker) map.removeLayer(marker);
-                                marker = L.marker(e.latlng).addTo(map);
-                                document.getElementById('pickup_location').value = e.latlng.lat.toFixed(5) + ", " + e.latlng.lng.toFixed(5);
+                                marker = L.marker([lat, lng]).addTo(map).bindPopup('Exact Pickup Point').openPopup();
+                                document.getElementById('pickup_location').value = lat.toFixed(5) + ", " + lng.toFixed(5);
+                            }
+
+                            // Handle Map Click
+                            map.on('click', function(e) {
+                                updateLocation(e.latlng.lat, e.latlng.lng);
                             });
+
+                            // Handle Auto-Detect Auto-detect button
+                            document.getElementById('detect-loc-btn').addEventListener('click', function() {
+                                var btn = this;
+                                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating...';
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(function(position) {
+                                        updateLocation(position.coords.latitude, position.coords.longitude);
+                                        btn.innerHTML = '<i class="fa-solid fa-check" style="color: #2ecc71;"></i> Found';
+                                        setTimeout(() => btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Use My Location', 3000);
+                                    }, function(error) {
+                                        alert("Geolocation failed! Please allow location permissions in your browser.");
+                                        btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Use My Location';
+                                    });
+                                } else {
+                                    alert("Geolocation is not supported by this browser.");
+                                    btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Use My Location';
+                                }
+                            });
+
+                            // Handle Manual Address Typing
+                            var locInput = document.getElementById('pickup_location');
+                            locInput.addEventListener('change', function(e) {
+                                var val = e.target.value.trim();
+                                // Skip if empty or already coordinates
+                                if (val === '' || /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(val)) return;
+
+                                fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val))
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data && data.length > 0) {
+                                            var lat = parseFloat(data[0].lat);
+                                            var lng = parseFloat(data[0].lon);
+                                            map.setView([lat, lng], 14);
+                                            if (marker) map.removeLayer(marker);
+                                            marker = L.marker([lat, lng]).addTo(map).bindPopup('Geocoded: ' + val).openPopup();
+                                        }
+                                    }).catch(err => console.log('Geocoding error:', err));
+                            });
+                            
+                            // Auto trigger on page load for convenience
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(function(position) {
+                                    updateLocation(position.coords.latitude, position.coords.longitude);
+                                }, function(e) { console.warn("Auto-location denied"); });
+                            }
                         });
                     </script>
                 </div>

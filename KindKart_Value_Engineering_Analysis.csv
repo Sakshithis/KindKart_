@@ -1,0 +1,9 @@
+Category,Feature / Component,Est. Dev Cost ($),Monthly Operating Cost ($),End-User Value (1-10),Platform Value (1-10),Total Value Score,Value-to-Cost Ratio,Value Engineering Decision,Justification
+Infrastructure,Render.com Web Service Hosting,$0.00,$7.00,10,10,20,High,Optimize / Keep,Core infrastructure. Render is cost-effective for Flask apps compared to AWS.
+Database,PostgreSQL (Render/Supabase),$150.00,$0.00 (Free Tier),10,10,20,Very High,Keep,Essential for structured relational mapping. Zero operational cost on free tiers.
+Communication,Socket.IO WebSockets (Eventlet),$300.00,$0.00,9,8,17,High,Keep,Critical for P2P coordination. Huge value addition with zero ongoing third-party API costs.
+Mapping & GIS,Leaflet.js + OpenStreetMap,$100.00,$0.00 (OpenSource),8,7,15,Very High,Keep,Replaces expensive Google Maps API completely while fulfilling the exact same functional location requirement.
+User Retention,Reputation Score Gamification,$100.00,$0.00,8,9,17,High,Optimize,Drives user motivation and trust (as requested in Google Forms) for zero recurring cost.
+Security,Flask-Login + Bcrypt Auth,$150.00,$0.00,10,10,20,High,Keep,Mandatory requirement for platform trust. Fully open-source and free.
+Future Expansion,SMS Text Notifications (Twilio),$250.00,$25.00+ (Variable),6,7,13,Low,Drop / Postpone,WebSockets and UI Notification Badges already solve the push-notification problem for free. SMS API adds unnecessary recurring debt.
+Future Expansion,Integrated Delivery Logistics,$500.00,$50.00+ (Variable),8,6,14,Low,Postpone,Development and operational costs are too high for MVP. Stick to P2P pickup for now.
