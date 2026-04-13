@@ -46,8 +46,21 @@
                     <p id="location-text" style="color: var(--text-muted);">{{ item.pickup_location }}</p>
                     
                     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+                    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+                    
                     <div id="detail-map" style="height: 200px; width: 100%; border-radius: 8px; z-index: 1; display: none;"></div>
+                    
+                    <!-- Dynamic Routing UI -->
+                    <div id="routing-ui" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-color);">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button id="btn-route-drive" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;"><i class="fa-solid fa-car"></i> Drive</button>
+                            <button id="btn-route-walk" class="btn btn-outline" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;"><i class="fa-solid fa-person-walking"></i> Walk</button>
+                            <span id="distance-readout" style="margin-left: auto; font-weight: bold; color: var(--primary-color); display: flex; align-items: center;">📍 Calculating...</span>
+                        </div>
+                    </div>
+
                     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+                    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
                             var locText = "{{ item.pickup_location }}";
@@ -62,6 +75,7 @@
                                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                                 L.marker([lat, lng]).addTo(map).bindPopup("Exact Pickup Location");
                                 document.getElementById('location-text').innerText = "Pinned Coordinates: " + lat.toFixed(4) + ", " + lng.toFixed(4);
+                                initRouting(map, lat, lng);
                             } else {
                                 // Automatically Geocode user's text address
                                 fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(locText))
@@ -74,8 +88,52 @@
                                             var map = L.map('detail-map').setView([lat, lng], 14);
                                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                                             L.marker([lat, lng]).addTo(map).bindPopup("Approximate: " + locText);
+                                            initRouting(map, lat, lng);
                                         }
                                     }).catch(err => console.log('Geocoding detail error:', err));
+                            }
+
+                            function initRouting(map, itemLat, itemLng) {
+                                let routingControl = null;
+                                if (navigator.geolocation) {
+                                    navigator.geolocation.getCurrentPosition(function(position) {
+                                        let userLat = position.coords.latitude;
+                                        let userLng = position.coords.longitude;
+                                        
+                                        let distKm = (map.distance([userLat, userLng], [itemLat, itemLng]) / 1000).toFixed(1);
+                                        
+                                        document.getElementById('routing-ui').style.display = 'block';
+                                        document.getElementById('distance-readout').innerHTML = `📍 ${distKm} km away`;
+                                        
+                                        function drawRoute(profile) {
+                                            if (routingControl) map.removeControl(routingControl);
+                                            
+                                            routingControl = L.Routing.control({
+                                                waypoints: [
+                                                    L.latLng(userLat, userLng),
+                                                    L.latLng(itemLat, itemLng)
+                                                ],
+                                                router: L.Routing.osrmv1({
+                                                    serviceUrl: 'https://router.project-osrm.org/route/v1',
+                                                    profile: profile
+                                                }),
+                                                lineOptions: {
+                                                    styles: [{color: (profile==='foot' ? '#10b981' : '#3b82f6'), opacity: 0.8, weight: 6}]
+                                                },
+                                                addWaypoints: false,
+                                                routeWhileDragging: false,
+                                                fitSelectedRoutes: true,
+                                                show: false 
+                                            }).addTo(map);
+                                        }
+                                        
+                                        document.getElementById('btn-route-drive').onclick = () => drawRoute('driving');
+                                        document.getElementById('btn-route-walk').onclick = () => drawRoute('foot');
+                                        
+                                    }, function(err) {
+                                        console.log("Geolocation denied, routing UI disabled.");
+                                    });
+                                }
                             }
                         });
                     </script>

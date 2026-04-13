@@ -42,7 +42,17 @@ def browse():
     # Near Me Filter
     near_me = request.args.get('near_me')
     if near_me == 'true' and current_user.is_authenticated and current_user.location:
-        query = query.filter(Item.pickup_location.ilike(f'%{current_user.location}%'))
+        from sqlalchemy import or_
+        loc = current_user.location.strip()
+        # Split location by comma to safely match parts (e.g. "Delhi, India" -> matches "Delhi")
+        parts = [p.strip() for p in loc.replace('-', ' ').split(',')]
+        filters = [Item.pickup_location.ilike(f'%{p}%') for p in parts if len(p) > 2]
+        # Fallback if somehow there are no >2 length words 
+        if not filters and parts:
+            filters = [Item.pickup_location.ilike(f'%{parts[0]}%')]
+            
+        if filters:
+            query = query.filter(or_(*filters))
 
     page = request.args.get('page', 1, type=int)
     pagination = query.paginate(page=page, per_page=12, error_out=False)

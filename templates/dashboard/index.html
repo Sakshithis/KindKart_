@@ -7,9 +7,14 @@
         <h1>My Dashboard</h1>
         <p>Manage your donations, requests, and impact.</p>
     </div>
-    <a href="{{ url_for('main.leaderboard') }}" class="btn" style="background-color: var(--warning-color); color: #111; font-weight: bold; padding: 0.8rem 1.5rem; text-decoration: none; border-radius: var(--radius-md); border: var(--border-dark); box-shadow: var(--shadow-hard-sm);">
-        <i class="fa-solid fa-trophy"></i> View Leaderboard
-    </a>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+        <a href="{{ url_for('main.leaderboard') }}" class="btn btn-outline" style="font-weight: bold; padding: 0.8rem 1.5rem;">
+            <i class="fa-solid fa-trophy"></i> Leaderboard
+        </a>
+        <a href="{{ url_for('main.certificate') }}" class="btn btn-primary" style="font-weight: bold; padding: 0.8rem 1.5rem;">
+            <i class="fa-solid fa-award"></i> Certificate
+        </a>
+    </div>
 </div>
 
 <div class="dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem;">
@@ -33,7 +38,7 @@
     </div>
 </div>
 
-<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+<div class="dashboard-tabs" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border);">
     <h2>My Donations</h2>
     {% if donations %}
         <div style="overflow-x: auto; margin-top: 1rem;">
@@ -72,7 +77,7 @@
     {% endif %}
 </div>
 
-<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-top: 2rem;">
+<div class="dashboard-tabs" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border); margin-top: 2rem;">
     <h2>Requests Received</h2>
     {% if requests_received %}
         <div style="overflow-x: auto; margin-top: 1rem;">
@@ -127,7 +132,7 @@
     {% endif %}
 </div>
 
-<div class="dashboard-tabs" style="background: var(--surface-color); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); margin-top: 2rem;">
+<div class="dashboard-tabs" style="background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); border: 1px solid var(--glass-border); margin-top: 2rem;">
     <h2>My Requests (Sent)</h2>
     {% if requests_sent %}
         <div style="overflow-x: auto; margin-top: 1rem;">

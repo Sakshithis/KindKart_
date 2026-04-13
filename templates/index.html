@@ -8,9 +8,9 @@
     <div class="hero-buttons">
         <a href="{{ url_for('items.browse') }}" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Browse Items</a>
         {% if current_user.is_authenticated %}
-            <a href="{{ url_for('items.donate') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem; background: white;">Donate Now</a>
+            <a href="{{ url_for('items.donate') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Donate Now</a>
         {% else %}
-            <a href="{{ url_for('auth.register') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem; background: white;">Join the Community</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline" style="padding: 0.8rem 2rem; font-size: 1.1rem;">Join the Community</a>
         {% endif %}
     </div>
     <div style="margin-top: 2rem;">
@@ -21,22 +21,22 @@
 <section class="features" style="padding: 4rem 0; margin-bottom: 4rem;">
     <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; letter-spacing: -0.025em;">How It Works</h2>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
-        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
-            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--primary-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+        <div style="text-align: center; background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-8px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--primary-glow); filter: drop-shadow(0 0 10px rgba(255,105,180,0.5)); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
                 <i class="fa-solid fa-camera" style="font-size: 2.5rem;"></i>
             </div>
             <h3 style="font-size: 1.5rem; text-transform: uppercase;">1. Snap & List</h3>
             <p style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Take a photo of the item you want to donate and list it on KindKart.</p>
         </div>
-        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
-            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--secondary-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+        <div style="text-align: center; background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-8px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--secondary-glow); filter: drop-shadow(0 0 10px rgba(0,229,255,0.5)); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
                 <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem;"></i>
             </div>
             <h3 style="font-size: 1.5rem; text-transform: uppercase;">2. Request</h3>
             <p style="color: var(--text-color); font-weight: 500; font-size: 1.1rem;">Browse available items in your area and request what you need.</p>
         </div>
-        <div style="text-align: center; background: var(--surface-color); padding: 2rem; border: var(--border-dark); border-radius: var(--radius-md); box-shadow: var(--shadow-hard-md); transition: transform 0.2s;" onmouseover="this.style.transform='translate(-4px, -4px)'; this.style.boxShadow='var(--shadow-hard-lg)';" onmouseout="this.style.transform='translate(0, 0)'; this.style.boxShadow='var(--shadow-hard-md)';">
-            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--accent-color); border: var(--border-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111111; box-shadow: var(--shadow-hard-sm);">
+        <div style="text-align: center; background: var(--glass-bg); backdrop-filter: var(--glass-blur); padding: 2rem; border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: var(--glass-shadow); transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-8px)';" onmouseout="this.style.transform='translateY(0)';">
+            <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem auto; background: var(--accent-glow); filter: drop-shadow(0 0 10px rgba(255,230,0,0.5)); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #111;">
                 <i class="fa-solid fa-handshake" style="font-size: 2.5rem;"></i>
             </div>
             <h3 style="font-size: 1.5rem; text-transform: uppercase;">3. Connect & Exchange</h3>

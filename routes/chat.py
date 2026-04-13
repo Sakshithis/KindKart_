@@ -37,7 +37,8 @@ def send_message(request_id):
         'msg': content,
         'username': current_user.username,
         'sender_id': str(current_user.id),
-        'attachment_url': None
+        'attachment_url': None,
+        'is_read': False
     }, room=str(req.id))
 
     return jsonify({'success': True, 'msg': content, 'username': current_user.username})
@@ -66,6 +67,16 @@ def room(request_id):
         return redirect(url_for('main.dashboard'))
         
     messages = Message.query.filter_by(request_id=req.id).order_by(Message.created_at.asc()).all()
+    
+    # Mark messages from the OTHER user as read when we open the chat
+    unread_msgs = Message.query.filter_by(request_id=req.id).filter(Message.sender_id != current_user.id).filter_by(is_read=False).all()
+    if unread_msgs:
+        for m in unread_msgs:
+            m.is_read = True
+        db.session.commit()
+        # notify the other user that their messages were just read
+        from app import socketio as sio
+        sio.emit('messages_read', {'reader_id': current_user.id}, room=str(req.id))
     
     other_user = req.item.donor if current_user.id == req.requester_id else req.requester
     
@@ -112,8 +123,21 @@ def handle_message(data):
         'msg': content, 
         'username': username, 
         'sender_id': str(sender_id),
-        'attachment_url': None
+        'attachment_url': None,
+        'is_read': False
     }, room=room)
+
+@socketio.on('mark_read')
+def handle_mark_read(data):
+    room = str(data['room'])
+    reader_id = int(data['user_id'])
+    
+    unread = Message.query.filter_by(request_id=int(room)).filter(Message.sender_id != reader_id, Message.is_read == False).all()
+    if unread:
+        for m in unread:
+            m.is_read = True
+        db.session.commit()
+        emit('messages_read', {'reader_id': reader_id}, room=room)
 
 @chat_bp.route('/upload_attachment/<int:request_id>', methods=['POST'])
 @login_required
@@ -161,7 +185,8 @@ def upload_attachment(request_id):
             'msg': msg.content,
             'username': current_user.username,
             'sender_id': current_user.id,
-            'attachment_url': att_url
+            'attachment_url': att_url,
+            'is_read': False
         }, room=str(req.id))
         sio.emit('new_notification', {'message': notif.content, 'link': notif.link}, room=f"user_{receiver_id}")
 

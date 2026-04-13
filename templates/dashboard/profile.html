@@ -47,7 +47,10 @@
                     <label>Email Address</label>
                     <input type="email" value="{{ user.email }}" disabled style="background-color: var(--bg-color);">
                 </div>
-                <a href="{{ url_for('main.edit_profile') }}" class="btn btn-outline"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <a href="{{ url_for('main.edit_profile') }}" class="btn btn-outline"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+                    <a href="{{ url_for('main.certificate') }}" class="btn btn-primary"><i class="fa-solid fa-award"></i> View Impact Certificate</a>
+                </div>
             </div>
         </div>
     </div>

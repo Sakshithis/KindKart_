@@ -4,13 +4,17 @@ def upgrade():
     try:
         conn = sqlite3.connect('c:/KindKart/KindKart_/kindkart.db')
         conn.execute('ALTER TABLE message ADD COLUMN attachment_url VARCHAR(255)')
-        conn.commit()
-        print("Column added successfully!")
     except Exception as e:
-        if 'duplicate column name' in str(e).lower():
-            print("Column already exists. All good!")
-        else:
-            print(f"Error: {e}")
+        print(f"attachment_url error: {e}")
+    try:
+        conn.execute('ALTER TABLE message ADD COLUMN is_read BOOLEAN DEFAULT 0')
+    except Exception as e:
+        print(f"is_read error: {e}")
+    try:
+        conn.commit()
+        print("Columns updated successfully!")
+    except Exception as e:
+        print(f"Error: {e}")
     finally:
         conn.close()
 

@@ -12,11 +12,13 @@
         display: flex;
         flex-direction: column;
         height: 600px;
-        background: var(--surface-color);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        border: 1px solid var(--border-color);
-        /* Removed overflow:hidden - it was clipping the send button's clickable area */
+        background: rgba(255, 255, 255, 0.4);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--glass-shadow);
+        border: 1px solid var(--glass-border);
+        overflow: hidden;
     }
     
     /* Location Picker Modal Styles */
@@ -33,25 +35,33 @@
         justify-content: center;
     }
     dialog::backdrop {
-        background: rgba(0,0,0,0.5);
+        background: rgba(0,0,0,0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
     }
     .loc-modal {
-        background: var(--surface-color);
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
         width: 90%; max-width: 500px;
-        border-radius: 24px;
-        padding: 1.5rem;
-        box-shadow: 8px 8px 0px #111111;
-        border: 2px solid #111111;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        box-shadow: var(--glass-shadow);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: var(--text-color);
     }
-    .loc-modal h3 { margin-top: 0; margin-bottom: 1rem; }
+    .loc-modal h3 { margin-top: 0; margin-bottom: 1rem; color: var(--text-color); }
     .chat-header {
         padding: 1.5rem;
-        background: var(--bg-color);
-        border-bottom: 1px solid var(--border-color);
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--glass-border);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    body.dark-theme .chat-header {
+        background: rgba(0, 0, 0, 0.2);
     }
     .chat-messages {
         flex: 1;
@@ -63,64 +73,91 @@
     }
     .message {
         max-width: 70%;
-        padding: 1rem;
-        border-radius: var(--radius-lg);
+        padding: 1rem 1.25rem;
+        border-radius: 28px;
         font-size: 0.95rem;
         line-height: 1.5;
+        box-shadow: var(--glass-shadow);
     }
     .message-other {
-        background-color: #f1f3f5;
+        background-color: var(--glass-bg);
+        backdrop-filter: blur(4px);
         color: var(--text-color);
         align-self: flex-start;
-        border-bottom-left-radius: 0;
+        border-bottom-left-radius: 6px;
+        border: 1px solid var(--glass-border);
     }
     .message-self {
-        background-color: var(--primary-color);
+        background: linear-gradient(135deg, rgba(160, 180, 255, 0.8), rgba(210, 160, 255, 0.8)); /* Soft light indigo/purple gradient */
+        backdrop-filter: blur(8px);
         color: white;
         align-self: flex-end;
-        border-bottom-right-radius: 0;
+        border-bottom-right-radius: 6px;
+        border: 1px solid rgba(255,255,255,0.4);
     }
     .chat-input {
         padding: 1.5rem;
-        border-top: 1px solid var(--border-color);
+        border-top: 1px solid var(--glass-border);
         display: flex;
         gap: 1rem;
         align-items: center;
-        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        background: var(--surface-color);
+        background: rgba(255, 255, 255, 0.1);
+    }
+    body.dark-theme .chat-input {
+        background: rgba(0, 0, 0, 0.2);
     }
     .chat-input input[type="text"] {
         flex: 1;
-        padding: 0.75rem 1rem;
-        border: 2px solid #111111;
+        padding: 0.85rem 1.2rem;
+        border: 1px solid var(--glass-border);
+        background: var(--glass-bg);
+        backdrop-filter: blur(4px);
         border-radius: var(--radius-full);
         font-size: 1rem;
-        box-shadow: none;
-        transform: none !important;
-        width: auto;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        color: var(--text-color);
+    }
+    body.dark-theme .chat-input input[type="text"] {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    .chat-input input[type="text"]:focus {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1);
+        outline: none;
+    }
+    body.dark-theme .chat-input input[type="text"]:focus {
+        background: rgba(0, 0, 0, 0.4);
     }
     /* Override brutal btn styles just for chat action buttons */
     .chat-action-btn {
-        width: 46px;
-        height: 46px;
-        min-width: 46px;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
         border-radius: 50%;
-        border: 2px solid #111111;
+        border: 1px solid var(--glass-border);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        font-size: 1rem;
-        transition: opacity 0.15s ease;
-        box-shadow: 3px 3px 0px #111111;
-        transform: none !important;
+        font-size: 1.1rem;
+        transition: var(--transition);
+        box-shadow: var(--glass-shadow);
         position: relative;
         z-index: 10;
+        overflow: hidden;
     }
-    .chat-action-btn:hover { opacity: 0.85; }
-    .chat-action-btn:active { box-shadow: 1px 1px 0px #111111; transform: translate(2px, 2px) !important; }
-    .chat-send-btn { background-color: var(--primary-color); color: white; }
-    .chat-attach-btn { background-color: var(--surface-color); color: #111111; }
+    .chat-action-btn:hover { 
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .chat-action-btn:active { transform: scale(0.95); }
+    .chat-send-btn { 
+        background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+        color: white; 
+        border-color: rgba(255,255,255,0.4);
+    }
+    .chat-attach-btn { background-color: var(--glass-bg); color: var(--text-color); backdrop-filter: blur(4px); }
 </style>
 {% endblock %}
 
@@ -133,8 +170,8 @@
     <div class="loc-modal">
         <h3>Share Location</h3>
         <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-            <input type="text" id="map-search-input" placeholder="Search places..." style="flex: 1; padding: 0.5rem; border: 2px solid var(--border-color); border-radius: var(--radius-sm);">
-            <button type="button" id="map-search-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem;"><i class="fa-solid fa-search"></i></button>
+            <input type="text" id="map-search-input" placeholder="Search places..." style="flex: 1; padding: 0.75rem 1rem; border: 1px solid var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(4px); border-radius: var(--radius-full); box-shadow: inset 0 2px 5px rgba(0,0,0,0.02); color: var(--text-color); outline: none;">
+            <button type="button" id="map-search-btn" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; border-radius: var(--radius-full);"><i class="fa-solid fa-search"></i></button>
         </div>
         <div id="picker-map" style="height: 300px; width: 100%; margin-bottom: 1rem; border-radius: 8px; z-index: 1;"></div>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; text-align: center;">Drag the pin to adjust the exact location.</p>
@@ -178,12 +215,15 @@
                         {% endif %}
                         {% if msg.content.startswith('[LOCATION:') %}
                             {% set parts = msg.content.replace('[LOCATION:', '').replace(']', '').split(',') %}
-                            <div style="padding: 0.5rem; background: rgba(0,0,0,0.1); border-radius: 8px; display: inline-block;">
-                                <a href="https://www.google.com/maps?q={{ parts[0] }},{{ parts[1] }}" target="_blank" style="color: white; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a>
+                            <div style="padding: 0.5rem 1rem; background: rgba(0,0,0,0.15); border-radius: 8px; display: inline-block;">
+                                <a href="https://www.google.com/maps?q={{ parts[0] }},{{ parts[1] }}" target="_blank" style="color: white; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; text-shadow: none;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a>
                             </div>
                         {% else %}
                             {{ msg.content }}
                         {% endif %}
+                        <div style="text-align: right; margin-top: 2px;">
+                            <span class="read-receipt {% if msg.is_read %}read{% else %}unread{% endif %}" style="font-size: 0.75rem; color: {% if msg.is_read %}#3b82f6{% else %}#e2e8f0; opacity: 0.8{% endif %}; font-weight: bold; letter-spacing: -1px;">✓✓</span>
+                        </div>
                     </div>
                 {% else %}
                     <div class="message message-other">
@@ -193,8 +233,8 @@
                         {% endif %}
                         {% if msg.content.startswith('[LOCATION:') %}
                             {% set parts = msg.content.replace('[LOCATION:', '').replace(']', '').split(',') %}
-                            <div style="padding: 0.5rem; background: var(--bg-color); border-radius: 8px; display: inline-block; border: 1px solid var(--border-color); margin-top: 0.3rem;">
-                                <a href="https://www.google.com/maps?q={{ parts[0] }},{{ parts[1] }}" target="_blank" style="color: var(--primary-color); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a>
+                            <div style="padding: 0.5rem 1rem; background: var(--glass-bg); border-radius: 8px; display: inline-block; border: 1px solid var(--glass-border); margin-top: 0.3rem;">
+                                <a href="https://www.google.com/maps?q={{ parts[0] }},{{ parts[1] }}" target="_blank" style="color: var(--primary-glow); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; text-shadow: none;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a>
                             </div>
                         {% else %}
                             {{ msg.content }}
@@ -209,7 +249,7 @@
             <button type="button" class="chat-action-btn chat-attach-btn" id="attach-btn" title="Send Picture">
                 <i class="fa-solid fa-paperclip"></i>
             </button>
-            <button type="button" class="chat-action-btn chat-attach-btn" id="attach-loc-btn" title="Share Location" style="background-color: var(--secondary-color); color: white; margin-left: -0.5rem;">
+            <button type="button" class="chat-action-btn chat-attach-btn" id="attach-loc-btn" title="Share Location" style="margin-left: -0.5rem;">
                 <i class="fa-solid fa-location-crosshairs"></i>
             </button>
             <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
@@ -250,6 +290,29 @@
             chatSocket.on('message', function(data) {
                 if (String(data.sender_id) === String(ME_ID)) return;
                 appendMessage(data.username, data.msg, false, data.attachment_url);
+                
+                // If we receive a message while we are looking at the chat, mark it read!
+                if (document.visibilityState === 'visible') {
+                    chatSocket.emit('mark_read', { room: ROOM, user_id: ME_ID });
+                }
+            });
+
+            // --- Real-time Read Receipts (Blue Ticks) ---
+            chatSocket.on('messages_read', function(data) {
+                if (String(data.reader_id) !== String(ME_ID)) {
+                    // The other person just read our messages!
+                    document.querySelectorAll('.read-receipt.unread').forEach(function(el) {
+                        el.style.color = '#3b82f6';
+                        el.style.opacity = '1';
+                        el.classList.remove('unread');
+                        el.classList.add('read');
+                    });
+                }
+            });
+
+            // If we switch tabs and come back, mark pending messages read
+            window.addEventListener('focus', function() {
+                chatSocket.emit('mark_read', { room: ROOM, user_id: ME_ID });
             });
         }
     } catch(e) {
@@ -299,11 +362,17 @@
         let safe = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
         if (safe.startsWith('[LOCATION:')) {
             let coords = safe.replace('[LOCATION:', '').replace(']', '').split(',');
-            let btnStyle = isSelf ? 'color: white; background: rgba(0,0,0,0.1);' : 'color: var(--primary-color); background: var(--bg-color); border: 1px solid var(--border-color);';
-            safe = `<div style="padding: 0.5rem; border-radius: 8px; display: inline-block; margin-top: 0.3rem; ${btnStyle}"><a href="https://www.google.com/maps?q=${coords[0]},${coords[1]}" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a></div>`;
+            let btnStyle = isSelf ? 'color: white; background: rgba(255,255,255,0.2); text-shadow: none; border: 1px solid rgba(255,255,255,0.4);' : 'color: var(--primary-glow); background: var(--glass-bg); border: 1px solid var(--glass-border); text-shadow: none;';
+            safe = `<div style="padding: 0.5rem 1rem; border-radius: 8px; display: inline-block; margin-top: 0.3rem; ${btnStyle}"><a href="https://www.google.com/maps?q=${coords[0]},${coords[1]}" target="_blank" style="color: inherit; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;"><i class="fa-solid fa-map-location-dot" style="font-size: 1.2rem;"></i> View Shared Location</a></div>`;
         }
         
-        html += isSelf ? safe : `<strong>${username}:</strong><br>${safe}`;
+        if (isSelf) {
+            html += safe;
+            html += `<div style="text-align: right; margin-top: 2px;"><span class="read-receipt unread" style="font-size: 0.75rem; color: #e2e8f0; opacity: 0.8; font-weight: bold; letter-spacing: -1px;">✓✓</span></div>`;
+        } else {
+            html += `<strong>${username}:</strong><br>${safe}`;
+        }
+        
         div.innerHTML = html;
 
         messagesDiv.appendChild(div);

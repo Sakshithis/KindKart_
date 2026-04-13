@@ -10,24 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}?v=3">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
-    <style>
-        [data-theme="dark"] {
-            --bg-color: #1a1a1a !important;
-            --surface-color: #2d2d2d !important;
-            --text-color: #ffffff !important;
-            --text-muted: #aaaaaa !important;
-            --border-dark: 4px solid #ffffff !important;
-            --border-light: 2px solid #ffffff !important;
-            --shadow-hard-sm: 4px 4px 0px #ffffff !important;
-            --shadow-hard-md: 6px 6px 0px #ffffff !important;
-            --shadow-hard-lg: 10px 10px 0px #ffffff !important;
-            --shadow-hard-hover: 2px 2px 0px #ffffff !important;
-            background-image: radial-gradient(#333333 1px, transparent 1px) !important;
-        }
-    </style>
+
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.setAttribute('data-theme', 'dark');
+            document.documentElement.classList.add('dark-theme');
+            window.addEventListener('DOMContentLoaded', () => { document.body.classList.add('dark-theme'); });
         }
     </script>
     {% block extra_css %}{% endblock %}
@@ -159,10 +147,14 @@
                     const currentlyDark = document.documentElement.getAttribute('data-theme') === 'dark';
                     if (currentlyDark) {
                         document.documentElement.removeAttribute('data-theme');
+                        document.documentElement.classList.remove('dark-theme');
+                        document.body.classList.remove('dark-theme');
                         localStorage.setItem('theme', 'light');
                         icon.className = 'fa-solid fa-moon';
                     } else {
                         document.documentElement.setAttribute('data-theme', 'dark');
+                        document.documentElement.classList.add('dark-theme');
+                        document.body.classList.add('dark-theme');
                         localStorage.setItem('theme', 'dark');
                         icon.className = 'fa-solid fa-sun';
                     }

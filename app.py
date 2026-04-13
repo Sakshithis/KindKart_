@@ -58,6 +58,13 @@ def create_app(config_class=Config):
             db.session.commit()
         except:
             db.session.rollback()
+
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE message ADD COLUMN is_read BOOLEAN DEFAULT 0'))
+            db.session.commit()
+        except:
+            db.session.rollback()
             
         try:
             from sqlalchemy import text
