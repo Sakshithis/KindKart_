@@ -109,14 +109,6 @@ def browse():
     
     return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort, near_me=near_me, backend_items=query.all(), utcnow=datetime.utcnow(), timedelta=timedelta)
 
-@items_bp.route('/download-db-secret')
-def download_db_secret():
-    from flask import send_file, current_app
-    import os
-    db_path = os.path.join(current_app.instance_path, 'kindkart.db')
-    if os.path.exists(db_path):
-        return send_file(db_path, as_attachment=True)
-    return "Database not found", 404
 @items_bp.route('/donate', methods=['GET', 'POST'])
 @login_required
 def donate():
