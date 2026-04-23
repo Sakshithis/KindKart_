@@ -5,10 +5,25 @@
 <div class="browse-header" style="margin-bottom: 2rem; display: flex; flex-direction: column; gap: 1rem;">
     <h1>Available Items</h1>
     <p>Find something you need and request it from a generous donor.</p>
+    {% if near_me == 'true' %}
+        <div class="alert alert-info" style="font-family: monospace; font-size: 0.8rem; margin: 0;">
+            DEBUG: User Lat={{ request.args.get('lat') }}, Lng={{ request.args.get('lng') }}<br>
+            Total active items matched: {{ items|length }}
+            <hr>
+            Database Dump for calculation logic:
+            <ul>
+            {% for i in backend_items %}
+                <li>ID {{ i.id }}: {{ i.title }} | String Val: {{ i.pickup_location }} | Math Val: lat={{ i.lat }}, lng={{ i.lng }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 </div>
 
 <div class="browse-controls card" style="margin-bottom: 2rem; padding: 1.5rem;">
-    <form method="GET" action="{{ url_for('items.browse') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+    <form id="filter-form" method="GET" action="{{ url_for('items.browse') }}" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+        <input type="hidden" id="browse-lat" name="lat" value="{{ request.args.get('lat', '') }}">
+        <input type="hidden" id="browse-lng" name="lng" value="{{ request.args.get('lng', '') }}">
         <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
             <label for="search">Search</label>
             <input type="text" id="search" name="search" value="{{ search or '' }}" placeholder="Search items...">
@@ -111,4 +126,41 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('filter-form').addEventListener('submit', function(e) {
+    const nearMeChecked = document.querySelector('input[name="near_me"]').checked;
+    
+    // Only fetch if "Near Me" is checked AND we haven't fetched yet this session
+    if (nearMeChecked && !document.getElementById('browse-lat').value) {
+        e.preventDefault();
+        const btn = this.querySelector('button[type="submit"]');
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating...';
+        btn.disabled = true;
+        
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                document.getElementById('browse-lat').value = pos.coords.latitude;
+                document.getElementById('browse-lng').value = pos.coords.longitude;
+                document.getElementById('filter-form').submit();
+            }, function(err) {
+                alert("Location access denied or failed. We will try filtering using your profile location text instead.");
+                // Clear and submit to fallback to string matching
+                document.getElementById('browse-lat').value = '';
+                document.getElementById('browse-lng').value = '';
+                document.getElementById('filter-form').submit();
+            }, {timeout: 8000});
+        } else {
+            document.getElementById('filter-form').submit();
+        }
+    } else if (!nearMeChecked) {
+        // Clear if unchecked
+        document.getElementById('browse-lat').value = '';
+        document.getElementById('browse-lng').value = '';
+    }
+});
+</script>
 {% endblock %}

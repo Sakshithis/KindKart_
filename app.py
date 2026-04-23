@@ -73,6 +73,14 @@ def create_app(config_class=Config):
         except:
             db.session.rollback()
 
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('ALTER TABLE item ADD COLUMN lat FLOAT'))
+            db.session.execute(text('ALTER TABLE item ADD COLUMN lng FLOAT'))
+            db.session.commit()
+        except:
+            db.session.rollback()
+
         # Securely auto-inject the admin user so nobody else can claim it
         from models.models import User
         if not User.query.filter_by(username='admin').first():

@@ -28,6 +28,8 @@ class Item(db.Model):
     condition = db.Column(db.String(64), nullable=False)
     image_url = db.Column(db.String(256))
     pickup_location = db.Column(db.String(120), nullable=False)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
     status = db.Column(db.String(64), default='available') # available, pending, completed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=True)

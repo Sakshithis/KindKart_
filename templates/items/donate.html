@@ -12,6 +12,8 @@
         <div class="card-body" style="padding: 2.5rem;">
             <form method="POST" action="{{ url_for('items.donate') }}" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" id="lat_input" name="lat" value=""/>
+                <input type="hidden" id="lng_input" name="lng" value=""/>
                 
                 <div class="form-group">
                     <label for="title">Item Title <span style="color: var(--danger-color);">*</span></label>
@@ -82,7 +84,23 @@
                                 map.setView([lat, lng], 15);
                                 if (marker) map.removeLayer(marker);
                                 marker = L.marker([lat, lng]).addTo(map).bindPopup('Exact Pickup Point').openPopup();
-                                document.getElementById('pickup_location').value = lat.toFixed(5) + ", " + lng.toFixed(5);
+                                
+                                document.getElementById('lat_input').value = lat;
+                                document.getElementById('lng_input').value = lng;
+                                
+                                // Reverse Geocode
+                                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if(data && data.address) {
+                                            let loc = data.address.city || data.address.town || data.address.village || data.address.state || "Unknown";
+                                            document.getElementById('pickup_location').value = loc + (data.address.state ? ", " + data.address.state : "");
+                                        } else {
+                                            document.getElementById('pickup_location').value = lat.toFixed(5) + ", " + lng.toFixed(5);
+                                        }
+                                    }).catch(e => {
+                                        document.getElementById('pickup_location').value = lat.toFixed(5) + ", " + lng.toFixed(5);
+                                    });
                             }
 
                             // Handle Map Click
@@ -113,8 +131,15 @@
                             var locInput = document.getElementById('pickup_location');
                             locInput.addEventListener('change', function(e) {
                                 var val = e.target.value.trim();
-                                // Skip if empty or already coordinates
-                                if (val === '' || /^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(val)) return;
+                                if (val === '') return;
+                                
+                                // If user explicitly pasted coordinates, capture them!
+                                if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(val)) {
+                                    var coords = val.split(',');
+                                    document.getElementById('lat_input').value = coords[0].trim();
+                                    document.getElementById('lng_input').value = coords[1].trim();
+                                    return;
+                                }
 
                                 fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val))
                                     .then(res => res.json())
@@ -125,6 +150,8 @@
                                             map.setView([lat, lng], 14);
                                             if (marker) map.removeLayer(marker);
                                             marker = L.marker([lat, lng]).addTo(map).bindPopup('Geocoded: ' + val).openPopup();
+                                            document.getElementById('lat_input').value = lat;
+                                            document.getElementById('lng_input').value = lng;
                                         }
                                     }).catch(err => console.log('Geocoding error:', err));
                             });
