@@ -12,3 +12,4 @@ eventlet==0.35.2
 greenlet
 gunicorn==22.0.0
 psycopg2-binary
+psycopg[binary]
